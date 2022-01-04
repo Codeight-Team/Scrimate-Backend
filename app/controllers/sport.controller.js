@@ -31,6 +31,17 @@ exports.create = (req, res) => {
     });
 };
 
+//Search ID of sport by name
+exports.SearchIdByName = (req) => {
+  var sport_name = req.body.sport_name;
+
+  return Sport.findOne({where: {sport_name}})
+  .then(name => {
+    return name.sport_id;
+  });
+
+}
+
 // Retrieve all Tutorials from the database.
 exports.findAll = (req, res) => {
     const sport = req.query.title;
