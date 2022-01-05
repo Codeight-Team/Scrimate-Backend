@@ -21,7 +21,7 @@ exports.findAll = (req, res) => {
 
 // Find a single User with an user_id
 exports.findUserById = (user_id) => {
-  return User.findByPk(user_id, { include: ["address"] })
+  return User.findByPk(user_id)
     .then((user) => {
       return user;
     })

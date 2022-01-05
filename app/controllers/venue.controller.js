@@ -21,4 +21,14 @@ exports.createVenue = (sport_id, address_id, req) => {
         console.log(">> Error while creating Venue: ", err);
     });
 }
+
+exports.findIdByName = (req) => {
+    var venue_name = req.body.venue_name;
+
+    return Venue.findOne({where: {venue_name: venue_name}})
+    .then(name => {
+        return name.venue_id;
+    });
+
+}
     

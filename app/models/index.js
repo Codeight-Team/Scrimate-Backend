@@ -23,6 +23,7 @@ db.users = require("./user.model.js")(sequelize, Sequelize);
 db.sports = require("./sport.model.js")(sequelize, Sequelize);
 db.address = require("./address.model.js")(sequelize, Sequelize);
 db.venues = require("./venue.model.js")(sequelize, Sequelize);
+db.orders = require("./order.model.js")(sequelize, Sequelize);
 
 //RELATION
 
@@ -76,4 +77,50 @@ db.venues.belongsTo(db.address, {
 });
 //-------------------------------------------
 
+//ORDER RELATION
+//1. order - user
+db.users.hasMany(db.orders, {
+  as: "order",
+  foreignKey: {
+    name: "user_id",
+    allowNull: false
+  }
+});
+db.orders.belongsTo(db.users, {
+  foreignKey: {
+    name: "user_id",
+    as: "user",
+    allowNull: false
+  }
+});
+//2. order - sports
+db.sports.hasOne(db.orders, {
+  as: "order",
+  foreignKey: {
+    name: "sport_id",
+    allowNull: false
+  }
+});
+db.orders.belongsTo(db.sports, {
+  foreignKey: {
+    name: "sport_id",
+    as: "sport",
+    allowNull: false
+  }
+});
+//3. order - venue
+db.venues.hasOne(db.orders, {
+  as: "order",
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  }
+});
+db.orders.belongsTo(db.venues, {
+  foreignKey: {
+    name: "venue_id",
+    as: "venue",
+    allowNull: false
+  }
+});
 module.exports = db;
