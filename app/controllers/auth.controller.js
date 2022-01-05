@@ -5,10 +5,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Regist User
-exports.createUser = (address_id, req) => {
+exports.createUser = async (address_id, req) => {
 
-    bcrypt.hash(req.body.password, 10, function (err, hashedPass) {
-        const user = {
+    var hashedPass = await bcrypt.hash(req.body.password, 10);
+    return User.create({
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             email: req.body.email,
@@ -18,16 +18,14 @@ exports.createUser = (address_id, req) => {
             DOB: req.body.DOB,
             image: req.body.image,
             address_id: address_id
-        };
-        return User.create(user)
-            .then(() => {
+    })
+            .then( (data) => {
                 console.log("User Created");
+                return data;
             })
             .catch((err) => {
                 console.log(">> Error while creating tutorial: ", err);
             });
-    })
-
 };
 
 //Login User

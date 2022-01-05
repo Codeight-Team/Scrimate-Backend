@@ -15,7 +15,7 @@ module.exports = app => {
 
             const auth = await authController.createUser(address.address_id, req);
 
-            res.send({address});
+            res.send({address, auth});
 
         } catch (err) {
             return next(err);
