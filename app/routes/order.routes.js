@@ -9,12 +9,12 @@ module.exports = app => {
     var router = require("express").Router();
 
     router.post('/create-order', async (req, res, next) => {
-        try {
+        try { 
             const idSport = await sportController.SearchIdByName(req);
             const idVenue = await venueController.findIdByName(req);
 
             const order = await orderController.createOrder(req.body.user_id , idVenue, idSport, req);
-            res.send(order);
+            res.send({order});
 
         } catch (err) {
             next(err)

@@ -12,8 +12,9 @@ exports.createOrder = (user_id, venue_id, sport_id,req) => {
     };
 
     return Order.create(order)
-    .then(() => {
+    .then( (data) => {
         console.log("Order Created");
+        return data;
     })
     .catch((err) => {
         console.log("error when creating order= ", err);
