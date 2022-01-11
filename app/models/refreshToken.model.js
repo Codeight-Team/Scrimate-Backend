@@ -6,12 +6,15 @@ module.exports = (sequelize, Sequelize) => {
         token: {
             type: Sequelize.STRING,
         },
+        access_token: {
+            type: Sequelize.STRING,
+        },
         expiryDate: {
             type: Sequelize.DATE,
         }
     });
 
-    RefreshToken.CreateToken = async function (user) {
+    RefreshToken.CreateToken = async function (user, accesstoken) {
         let expire = new Date();
 
         expire.setSeconds(expire.getSeconds() + config.jwtRefreshExpiration);
@@ -21,6 +24,7 @@ module.exports = (sequelize, Sequelize) => {
         let refreshToken = await this.create({
             token: tempToken,
             user_id : user.user_id,
+            access_token: accesstoken,
             expiryDate: expire.getTime()
         });
 
