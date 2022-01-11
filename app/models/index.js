@@ -24,6 +24,8 @@ db.sports = require("./sport.model.js")(sequelize, Sequelize);
 db.address = require("./address.model.js")(sequelize, Sequelize);
 db.venues = require("./venue.model.js")(sequelize, Sequelize);
 db.orders = require("./order.model.js")(sequelize, Sequelize);
+db.roles = require("./role.model")(sequelize, Sequelize);
+db.refreshToken = require("./refreshToken.model")(sequelize, Sequelize);
 
 //RELATION
 
@@ -123,4 +125,31 @@ db.orders.belongsTo(db.venues, {
     allowNull: false
   }
 });
+//-------------------------
+
+//ROLE RELATIONS
+db.roles.belongsToMany(db.users, {
+  through: "user_roles",
+  foreignKey: "role_id",
+  otherKey: "user_id"
+});
+db.users.belongsToMany(db.roles, {
+  through: "user_roles",
+  foreignKey: "user_id",
+  otherKey: "role_id",
+  as: "role"
+});
+//----------------------------------------------
+
+//REFRESH TOKEN RELATIONS
+db.refreshToken.belongsTo(db.users, {
+  foreignKey: 'user_id', targetKey: 'user_id'
+});
+db.users.hasOne(db.refreshToken, {
+  foreignKey: 'user_id', targetKey: 'user_id'
+});
+//----------------------------------------------
+
+db.ROLES = ["user", "admin"];
+
 module.exports = db;

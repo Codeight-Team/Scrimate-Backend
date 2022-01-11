@@ -17,10 +17,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const db = require("./app/models");
+const Role = db.roles;
 // db.sequelize.sync();
 //In development, you may need to drop existing tables and re-sync database. Just use force: true as following code:
 db.sequelize.sync({ force: true }).then(() => {
     console.log("Drop and re-sync db.");
+    initial();
   });
 
 // simple route
@@ -40,3 +42,13 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
+
+function initial() {
+  Role.create({
+    name: "user"
+  });
+ 
+  Role.create({
+    name: "admin"
+  });
+}
