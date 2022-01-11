@@ -1,10 +1,19 @@
 module.exports = app => {
     const authController = require("../controllers/auth.controller.js");
     const addressController = require("../controllers/address.controller.js");
+    const { verifySignup } = require("../middleware");
 
     var router = require("express").Router();
 
-    router.post('/register', async (req, res, next) => {
+    router.use(function(req,res,next) {
+        res.header(
+            "Access-Control-Allow-Headers",
+            "x-access-token, Origin, Content-Type, Accept"
+          );
+          next();
+    })
+
+    router.post('/register', [verifySignup.checkIfEmailIsDuplicate, verifySignup.checkRolesExisted], async (req, res, next) => {
         try {
             const address = await addressController.createAddress({
                 address_street: req.body.address_street,
@@ -13,15 +22,14 @@ module.exports = app => {
                 address_country: req.body.address_country
             });
 
-            const auth = await authController.createUser(address.address_id, req);
-
-            res.send({address, auth});
+            const auth = authController.createUser(address.address_id, req, res);
 
         } catch (err) {
             return next(err);
         }
     });
     router.post('/login', authController.findOne)
+    router.post('/refreshToken', authController.refreshToken)
 
     app.use('/api/auth', router);
 
