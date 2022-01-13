@@ -72,27 +72,53 @@ exports.findOne = async (req, res, next) => {
                 })
             }
 
-            var token = jwt.sign({ id: user.user_id }, config.secret, {
-                expiresIn: config.jwtExpiration
-            });
-
-            let refreshToken = await RefreshToken.CreateToken(user);
-
-            var authorities = [];
-
-            user.getRole().then(role => {
-                for (let i = 0; i < role.length; i++) {
-                    authorities.push("ROLE_" + role[i].name.toUpperCase());
+            let isRefreshTokenExist = await RefreshToken.findOne({
+                where: {
+                    user_id: {
+                        [Op.eq]: user.user_id
+                    }
                 }
-                res.status(200).send({
-                    user_id: user.user_id,
-                    email: user.email,
-                    role: authorities,
-                    accessToken: token,
-                    refreshToken: refreshToken,
-                })
-            })
+            }).then(async refreshTokenData => {
+                var token; let refreshToken;
+                if (refreshTokenData) {
+                    token = refreshTokenData.access_token;
+                    refreshToken = refreshTokenData.token;
+                    if(RefreshToken.verifyExpiration(refreshTokenData)){
+                        RefreshToken.update({expiryDate: new Date() + config.jwtRefreshExpiration},{
+                            where: {
+                                user_id: refreshTokenData.user_id
+                            }
+                        });
+                    }
+                    jwt.verify(token, config.secret, (err)=> {
+                        if (err){
+                            token = jwt.sign({ id: user.user_id }, config.secret, {
+                                expiresIn: config.jwtExpiration
+                            });
+                        }
+                    })
+                }else{
+                    token = jwt.sign({ id: user.user_id }, config.secret, {
+                        expiresIn: config.jwtExpiration
+                    });
+        
+                    refreshToken = await RefreshToken.CreateToken(user, token);
+                }
+                var authorities = [];
 
+                user.getRole().then(role => {
+                    for (let i = 0; i < role.length; i++) {
+                        authorities.push("ROLE_" + role[i].name.toUpperCase());
+                    }
+                    res.status(200).send({
+                        user_id: user.user_id,
+                        email: user.email,
+                        role: authorities,
+                        accessToken: token,
+                        refreshToken: refreshToken,
+                    })
+                })
+            });
         }).catch(err => {
             res.status(500).send({ message: err.message })
         })
@@ -101,22 +127,22 @@ exports.findOne = async (req, res, next) => {
 exports.refreshToken = async (req, res) => {
     const { refreshToken: requestToken } = req.body;
 
-    if(requestToken == null) {
+    if (requestToken == null) {
         return res.status(403).json({ message: "Refresh token is required" });
     }
 
     try {
-        let refreshToken = await RefreshToken.findOne({ where: {token: requestToken} });
+        let refreshToken = await RefreshToken.findOne({ where: { token: requestToken } });
 
         console.log(refreshToken);
 
-        if(!refreshToken){
+        if (!refreshToken) {
             res.status(403).json({ message: "Require refresh token in database" });
             return;
         }
 
-        if(RefreshToken.verifyExpiration(refreshToken)){
-            RefreshToken.destroy({ where: {id: refreshToken.id} });
+        if (RefreshToken.verifyExpiration(refreshToken)) {
+            RefreshToken.destroy({ where: { id: refreshToken.id } });
 
             res.status(403).json({
                 message: "Expired refresh token. Please re-sign"
@@ -125,7 +151,7 @@ exports.refreshToken = async (req, res) => {
         }
 
         const user = await refreshToken.getUser();
-        let newAccessToken = jwt.sign({user_id: user.user_id}, config.secret, {
+        let newAccessToken = jwt.sign({ user_id: user.user_id }, config.secret, {
             expiresIn: config.jwtExpiration,
         });
 
