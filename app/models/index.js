@@ -26,6 +26,11 @@ db.venues = require("./venue.model.js")(sequelize, Sequelize);
 db.orders = require("./order.model.js")(sequelize, Sequelize);
 db.roles = require("./role.model")(sequelize, Sequelize);
 db.refreshToken = require("./refreshToken.model")(sequelize, Sequelize);
+db.matchMaking = require("./matchMaking.model")(sequelize, Sequelize);
+db.fields = require("./field.model")(sequelize, Sequelize);
+db.schedules = require("./schedule.model")(sequelize, Sequelize);
+db.operationals = require("./operational.model")(sequelize, Sequelize);
+db.ratings = require("./rating.model")(sequelize, Sequelize);
 
 //RELATION
 
@@ -49,7 +54,7 @@ db.users.belongsTo(db.address, {
 //VENUE RELATION
 //1. VENUE - SPORT
 db.sports.hasMany(db.venues, {
-  as: "venue",
+  as: "venues",
   foreignKey: {
     name: "sport_id",
     allowNull: false
@@ -58,13 +63,11 @@ db.sports.hasMany(db.venues, {
 db.venues.belongsTo(db.sports, {
   foreignKey: {
     name: "sport_id",
-    as: "sport",
     allowNull: false
-  }
+  },
 });
 //2. Venue - ADDRESS
 db.address.hasMany(db.venues, {
-  as: "venue",
   foreignKey: {
     name: "address_id",
     allowNull: false
@@ -73,12 +76,115 @@ db.address.hasMany(db.venues, {
 db.venues.belongsTo(db.address, {
   foreignKey: {
     name: "address_id",
-    as: "address",
     allowNull: false
   }
 });
 //-------------------------------------------
+//OPERATIONAL RELATION
+db.venues.hasMany(db.operationals, {
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  }
+})
+//-------------------------------------------
+//Field RELATION
 
+db.venues.hasMany(db.fields, {
+  as: "field",
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  }
+});
+db.fields.belongsTo(db.venues, {
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  }
+});
+//-------------------------------------------
+//SCHEDULE RELATION
+db.schedules.belongsToMany(db.fields, {
+  through: "field_schedule",
+  foreignKey: "schedule_id",
+  otherKey: "field_id",
+  as: "field"
+});
+db.fields.belongsToMany(db.schedules, {
+  through: "field_schedule",
+  foreignKey: "field_id",
+  otherKey: "schedule_id",
+  as: "schedule"
+});
+//-------------------------------------------
+//MATCHMAKING RELATION
+db.users.hasMany(db.matchMaking, {
+  foreignKey: {
+    name: "creator_id",
+    allowNull: false
+  },
+  as: "creator"
+})
+db.users.hasMany(db.matchMaking, {
+  foreignKey: {
+    name: "finder_id",
+    allowNull: true
+  },
+  as: "finder"
+})
+db.venues.hasMany(db.matchMaking,{
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  },
+  as: "venue"
+})
+db.matchMaking.belongsTo(db.users, {
+  foreignKey: {
+    name: "creator_id",
+    allowNull: false
+  },
+  otherKey: {
+    name: "finder_id",
+    allowNull: true
+  }
+})
+db.matchMaking.belongsTo(db.venues, {
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  }
+})
+//-------------------------------------------
+//RATING RELATION
+db.ratings.belongsTo(db.users, {
+  foreignKey: {
+    name: "user_id",
+    allowNull: false
+  }
+})
+db.ratings.belongsTo(db.venues, {
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  }
+})
+db.users.hasMany(db.ratings, {
+  foreignKey: {
+    name: "user_id",
+    allowNull: false
+  },
+  as: 'user_rating'
+})
+db.venues.hasMany(db.ratings, {
+  foreignKey: {
+    name: "venue_id",
+    allowNull: false
+  },
+  as: 'venue_rating'
+})
+//-------------------------------------------
 //ORDER RELATION
 //1. order - user
 db.users.hasMany(db.orders, {

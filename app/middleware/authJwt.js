@@ -52,6 +52,18 @@ isAdmin = (req, res, next) => {
     });
 };
 
+isUserVerif = (req, res, next) => {
+    User.findByPk(req.body.user_id).then(user => {
+        if(user.isVerif == 0){
+            return res.status(403).send({
+                message: "You account must be verified"
+            })
+        }else{
+            next();
+        }
+    });
+}
+
 const authJwt = {
     verifyToken: verifyToken,
     isAdmin: isAdmin

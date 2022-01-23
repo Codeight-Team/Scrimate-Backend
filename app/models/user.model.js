@@ -29,6 +29,9 @@ module.exports = (sequelize, Sequelize) => {
           },
           image: {
             type: Sequelize.STRING
+          },
+          isVerif: {
+            type: Sequelize.BOOLEAN
           }
     });
   

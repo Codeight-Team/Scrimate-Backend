@@ -9,6 +9,9 @@ module.exports = (sequelize, Sequelize) => {
           address_street: {
             type: Sequelize.STRING
         },
+        address_region: {
+            type: Sequelize.STRING
+        },
         address_city: {
             type: Sequelize.STRING
         },

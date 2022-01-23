@@ -35,7 +35,7 @@ exports.update = (req, res) => {
   const id = req.params.id;
 
   User.update(req.body, {
-    where: { id: id }
+    where: { user_id: id }
   })
     .then(num => {
       if (num == 1) {

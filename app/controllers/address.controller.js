@@ -13,6 +13,7 @@ exports.createAddress = (address) => {
 
     return Address.create({
         address_street: address.address_street,
+        address_region: address.address_region,
         address_city: address.address_city,
         address_postalcode: address.address_postalcode,
         address_country: address.address_country
