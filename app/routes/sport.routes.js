@@ -13,7 +13,7 @@ module.exports = app => {
     })
 
     // Create a new Tutorial
-    router.post("/", [authJwt.verifyToken] , sports.create);
+    router.post("/" , sports.create);
 
     router.post("/test", sports.SearchIdByName);
 

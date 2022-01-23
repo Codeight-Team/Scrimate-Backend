@@ -1,7 +1,16 @@
 module.exports = app => {
     const users = require("../controllers/user.controller.js");
+    const ratings = require("../controllers/rating.controller");
   
     var router = require("express").Router();
+
+    router.post("/give-rating", async (req,res, next) => {
+      try {
+        await ratings.giveRating(req.body.user_id, req.body.venue_id, req, res);
+      } catch (err) {
+        res.send(err.message);
+      }
+    });
   
     // Retrieve all Tutorials
     router.get("/", users.findAll);
@@ -12,7 +21,7 @@ module.exports = app => {
         const id = req.params.id;
         console.log(id);
         const userData = await users.findUserById(id);
-        // res.send(userData);
+        res.send({userData});
         console.log(
           JSON.stringify(userData, null, 2)
         );
@@ -29,6 +38,7 @@ module.exports = app => {
   
     // Create a new Tutorial
     router.delete("/", users.deleteAll);
+
   
     app.use('/api/users', router);
   };

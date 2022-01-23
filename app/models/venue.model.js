@@ -9,14 +9,17 @@ module.exports = (sequelize, Sequelize) => {
         venue_name: {
             type: Sequelize.STRING
         },
-        venue_type: {
-            type: Sequelize.STRING
+        venue_facility: {
+            type: Sequelize.ARRAY(Sequelize.STRING)
         },
-        venue_contact: {
+        venue_description: {
             type: Sequelize.STRING
         },
         images: {
             type: Sequelize.STRING
+        },
+        isOpen: {
+            type: Sequelize.BOOLEAN
         }
     });
 
