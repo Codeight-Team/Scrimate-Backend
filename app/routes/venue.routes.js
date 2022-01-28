@@ -8,6 +8,7 @@ module.exports = app => {
 
     router.post('/insert-new-venue', async (req, res, next) => {
         try {
+            await venueController.upload;
             const address = await addressController.createAddress({
                 address_street: req.body.address_street,
                 address_region: req.body.address_region,

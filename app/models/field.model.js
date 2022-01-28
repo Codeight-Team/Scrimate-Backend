@@ -14,6 +14,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         field_type: {
             type: Sequelize.STRING
+        },
+        image: {
+            type: Sequelize.STRING
         }
     });
 

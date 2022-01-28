@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
         venue_description: {
             type: Sequelize.STRING
         },
-        images: {
+        image: {
             type: Sequelize.STRING
         },
         isOpen: {
