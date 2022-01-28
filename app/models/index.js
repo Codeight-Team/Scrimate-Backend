@@ -13,11 +13,15 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     idle: dbConfig.pool.idle
   }
 });
+const mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
 
 const db = {};
 
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
+db.mongoose = mongoose;
+db.url = dbConfig.url;
 
 db.users = require("./user.model.js")(sequelize, Sequelize);
 db.sports = require("./sport.model.js")(sequelize, Sequelize);
@@ -31,6 +35,9 @@ db.fields = require("./field.model")(sequelize, Sequelize);
 db.schedules = require("./schedule.model")(sequelize, Sequelize);
 db.operationals = require("./operational.model")(sequelize, Sequelize);
 db.ratings = require("./rating.model")(sequelize, Sequelize);
+db.conversations = require("./conversation.model")(mongoose);
+db.messages = require("./message.model")(mongoose);
+
 
 //RELATION
 
@@ -133,12 +140,12 @@ db.users.hasMany(db.matchMaking, {
   },
   as: "finder"
 })
-db.venues.hasMany(db.matchMaking,{
+db.fields.hasMany(db.matchMaking,{
   foreignKey: {
-    name: "venue_id",
+    name: "field_id",
     allowNull: false
   },
-  as: "venue"
+  as: "field"
 })
 db.matchMaking.belongsTo(db.users, {
   foreignKey: {
@@ -150,9 +157,9 @@ db.matchMaking.belongsTo(db.users, {
     allowNull: true
   }
 })
-db.matchMaking.belongsTo(db.venues, {
+db.matchMaking.belongsTo(db.fields, {
   foreignKey: {
-    name: "venue_id",
+    name: "field_id",
     allowNull: false
   }
 })
@@ -256,6 +263,6 @@ db.users.hasOne(db.refreshToken, {
 });
 //----------------------------------------------
 
-db.ROLES = ["user", "admin"];
+db.ROLES = ["user", "admin", "host"];
 
 module.exports = db;

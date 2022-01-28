@@ -17,7 +17,8 @@ exports.createUser = (address_id, req, res) => {
         phone_number: req.body.phone_number,
         gender: req.body.gender,
         DOB: req.body.DOB,
-        image: req.body.image,
+        image: "images/profile-pictute/default.png",
+        isVerif: false,
         address_id: address_id
     })
         .then(user => {

@@ -2,13 +2,20 @@ const db = require("../models");
 const Venue = db.venues;
 const Operational = db.operationals;
 const Op = db.Sequelize.Op;
+const multer = require('multer');
+const path = require('path');
 
 exports.createVenue = (sport_id, address_id, req, res) => {
+    let image_path;
+    if(req.file){
+        image_path = req.file.path.substr(11);
+    }
+    
     const venue = {
         venue_name: req.body.venue_name,
         venue_facility: req.body.venue_facility,
         venue_description: req.body.venue_description,
-        images: req.body.images,
+        image: image_path,
         isOpen: req.body.isOpen,
         sport_id: sport_id,
         address_id: address_id
@@ -74,9 +81,35 @@ exports.getVenueBySportAndRegion = (req) => {
 
 
             },
+            {
+                model: db.operationals
+            }
 
 
         ],
     });
 
 }
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'app/assets/images/venues')
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + req.body.venue_name + path.extname(file.originalname))
+    }
+})
+
+exports.upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        const fileTypes = /jpeg|jpg|png/
+        const mimeType = fileTypes.test(file.mimetype)
+        const extname = fileTypes.test(path.extname(file.originalname))
+
+        if (mimeType && extname) {
+            return cb(null, true)
+        }
+        cb('Give proper file formate')
+    }
+}).single('image')

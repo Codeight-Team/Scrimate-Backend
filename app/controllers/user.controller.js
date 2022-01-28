@@ -1,6 +1,8 @@
 const db = require("../models");
 const User = db.users;
 const Op = db.Sequelize.Op;
+const multer = require('multer');
+const path = require('path');
 
 // Retrieve all Users from the database.
 exports.findAll = (req, res) => {
@@ -21,13 +23,21 @@ exports.findAll = (req, res) => {
 
 // Find a single User with an user_id
 exports.findUserById = (user_id) => {
-  return User.findByPk(user_id)
-    .then((user) => {
-      return user;
-    })
-    .catch((err) => {
-      console.log(">> Error while finding tutorial: ", err);
-    });
+  return User.findOne({
+    where: {
+      user_id: user_id
+    },
+    attributes: {
+      include: 
+      [
+        [db.sequelize.literal(`(
+          SELECT COUNT(*)
+          FROM orders as orders
+          WHERE orders.user_id = user_id
+        )`), 'Match_Played']
+      ]
+    }
+  })
 };
 
 // Update a User by the user_id in the request
@@ -53,7 +63,39 @@ exports.update = (req, res) => {
         message: "Error updating User with id=" + id
       });
     });
+    if(req.file){
+      let path = req.file.path.substr(11)
+      const image = {
+        image: path
+      }
+      User.update(image, {
+        where: { user_id: id }
+      })
+    }
 };
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'app/assets/images/profile-picture')
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + req.params.id + path.extname(file.originalname))
+  }
+})
+
+exports.upload = multer({
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png/
+    const mimeType = fileTypes.test(file.mimetype)
+    const extname = fileTypes.test(path.extname(file.originalname))
+
+    if(mimeType && extname){
+      return cb(null, true)
+    }
+    cb('Give proper file formate')
+  }
+}).single('image')
 
 // Delete a User with the specified user_id in the request
 exports.delete = (req, res) => {

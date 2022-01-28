@@ -52,11 +52,29 @@ isAdmin = (req, res, next) => {
     });
 };
 
+isHost = (req, res, next) => {
+    User.findByPk(req.body.user_id).then(user => {
+        user.getRole().then(roles => {
+            for(let i=0;i < roles.length;i++){
+                if(roles[i].name == "host"){
+                    next();
+                    return;
+                }
+            }
+
+            res.status(403).send({
+                message: "require host role"
+            });
+            return;
+        });
+    });
+};
+
 isUserVerif = (req, res, next) => {
     User.findByPk(req.body.user_id).then(user => {
         if(user.isVerif == 0){
             return res.status(403).send({
-                message: "You account must be verified"
+                message: "Your account must be verified"
             })
         }else{
             next();

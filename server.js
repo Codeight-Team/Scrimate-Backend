@@ -16,13 +16,32 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
+//static image folder
+app.use('/images/profile-picture', express.static('./app/assets/images/profile-picture'));
+app.use('/images/venues', express.static('./app/assets/images/venues'));
+app.use('/images/fields', express.static('./app/assets/images/fields'));
+
+
 const db = require("./app/models");
 const Role = db.roles;
 // db.sequelize.sync();
 //In development, you may need to drop existing tables and re-sync database. Just use force: true as following code:
 db.sequelize.sync({ force: true }).then(() => {
-    console.log("Drop and re-sync db.");
-    initial();
+  console.log("Drop and re-sync db.");
+  initial();
+});
+
+db.mongoose
+  .connect(db.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log("Connected to the database!");
+  })
+  .catch(err => {
+    console.log("Cannot connect to the database!", err);
+    process.exit();
   });
 
 // simple route
@@ -47,8 +66,12 @@ function initial() {
   Role.create({
     name: "user"
   });
- 
+
   Role.create({
     name: "admin"
+  });
+
+  Role.create({
+    name: "host"
   });
 }
