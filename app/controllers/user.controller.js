@@ -44,25 +44,27 @@ exports.findUserById = (user_id) => {
 exports.update = (req, res) => {
   const id = req.params.id;
 
-  User.update(req.body, {
-    where: { user_id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "User was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`
-        });
-      }
+  if(!req.file){
+    User.update(req.body, {
+      where: { user_id: id }
     })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating User with id=" + id
+      .then(num => {
+        if (num == 1) {
+          res.send({
+            message: "User was updated successfully."
+          });
+        } else {
+          res.send({
+            message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500).send({
+          message: "Error updating User with id=" + id
+        });
       });
-    });
+  }
     if(req.file){
       let path = req.file.path.substr(11)
       const image = {
@@ -70,6 +72,13 @@ exports.update = (req, res) => {
       }
       User.update(image, {
         where: { user_id: id }
+      }).then(() => {
+        res.send({
+          message: "Success update image"
+        })
+      })
+      .catch(err => {
+        res.status(500).send({ message: err.message })
       })
     }
 };
