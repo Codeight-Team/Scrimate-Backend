@@ -2,6 +2,8 @@ const db = require("../models");
 const Field = db.fields;
 const Schedule = db.schedules;
 const Op = db.Sequelize.Op;
+const multer = require('multer');
+const path = require('path');
 
 exports.createField = ( req, res) => {
     const id = req.params.id;
@@ -36,7 +38,7 @@ exports.getFields = (req, res) => {
 
     return Field.findAll({
         where: {
-            venue_id = id
+            venue_id: id
         }
     })
 }
@@ -52,13 +54,13 @@ exports.getFieldSchedule = (req, res) => {
     
     Field.findOne({
         where: {
-            field_id = id
+            field_id: id
         },
         attribute: [],
         include: {
             model: db.schedules,
             where: {
-                schdule_date = date_choose
+                schdule_date: date_choose
             }
         }
     })

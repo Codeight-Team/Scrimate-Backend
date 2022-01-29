@@ -3,10 +3,10 @@ module.exports = app => {
 
     var router = require("express").Router();
 
-    // Retrieve a single Tutorial with id
+    // Retrieve a single Address with id
     router.get("/:id", address.findOne);
 
-    // Update a Tutorial with id
+    // Update a Address with id
     router.put("/:id", address.update);
 
     app.use('/api/address', router);

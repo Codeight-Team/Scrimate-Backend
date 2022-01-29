@@ -55,6 +55,12 @@ require("./app/routes/address.routes")(app);
 require("./app/routes/sport.routes")(app);
 require("./app/routes/venue.routes")(app);
 require("./app/routes/order.routes")(app);
+require("./app/routes/field.routes")(app);
+require("./app/routes/matchMaking.routes")(app);
+require("./app/routes/messager.routes")(app);
+
+
+
 
 // set port, listen for requests
 const PORT = process.env.PORT || 5000;

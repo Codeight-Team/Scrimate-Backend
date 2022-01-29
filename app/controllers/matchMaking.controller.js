@@ -27,7 +27,7 @@ exports.joinMatch = (req, res) => {
 
     MatchMaking.update(finder, {
         where: {
-            match_id = id
+            match_id: id
         }
     })
     .then( () => {
@@ -72,7 +72,7 @@ exports.deleteMatch = (req, res) => {
 
     MatchMaking.destory({
         where: {
-            match_id = id
+            match_id: id
         }
     })
     .then(match => {
