@@ -12,7 +12,7 @@ module.exports = app => {
             const address = await addressController.createAddress({
                 address_street: req.body.address_street,
                 address_region: req.body.address_region,
-                address_city: req.body.address_city,
+                address_city: "DKI Jakarta",
                 address_postalcode: req.body.address_postalcode,
                 address_country: req.body.address_country
             });
