@@ -35,7 +35,15 @@ exports.create = (req, res) => {
 exports.SearchIdByName = (req) => {
   var sport_name = req.body.sport_name;
 
-  return Sport.findOne({where: {sport_name}})
+  return Sport.findOne(
+    {
+      where: 
+      {
+        sport_name: { 
+          [Op.eq]: sport_name 
+        },
+      }
+  })
   .then(name => {
     return name.sport_id;
   });

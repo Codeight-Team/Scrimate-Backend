@@ -3,12 +3,14 @@ module.exports = app => {
     const venueController = require("../controllers/venue.controller");
     const addressController = require("../controllers/address.controller");
     const sportController = require('../controllers/sport.controller');
+    var multer = require('multer');
+
 
     var router = require("express").Router();
 
-    router.post('/insert-new-venue', async (req, res, next) => {
+    router.post('/insert-new-venue', venueController.upload , async (req, res, next) => {
         try {
-            await venueController.upload;
+            multer().array();
             const address = await addressController.createAddress({
                 address_street: req.body.address_street,
                 address_region: req.body.address_region,
