@@ -27,7 +27,7 @@ exports.createVenue = (sport_id, address_id, req, res) => {
             await Operational.createOperationalHour(venues.venue_id, req);
         })
         .catch(err => {
-            res.status(500).send({ message: err.message });
+            res.status(500).send({ message: err.message + "Venue" });
         });
 }
 
