@@ -1,8 +1,12 @@
 module.exports = app => {
+    const db = require("../models");
+    const Operational = db.operationals;
+
 
     const venueController = require("../controllers/venue.controller");
     const addressController = require("../controllers/address.controller");
     const sportController = require('../controllers/sport.controller');
+    
     var multer = require('multer');
 
 
@@ -25,6 +29,8 @@ module.exports = app => {
         }
     } );
 
+    router.post('/create-operationalhour/:id', Operational.createOperationalHour)
+
     router.get('/get-venue', async (req, res, next) => {
         try {
             const venue = await venueController.getVenueBySportAndRegion(req);
@@ -33,6 +39,9 @@ module.exports = app => {
             next(err)
         }
     })
+
+    //delete a venue
+    router.delete('/delete-a-venue/:id', venueController.delete);
 
     app.use('/api/venue', router);
 

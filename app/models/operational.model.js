@@ -19,14 +19,15 @@ module.exports = (sequelize, Sequelize) => {
 
     
 
-    Operational.createOperationalHour = (venue_id ,req) => {
+    Operational.createOperationalHour = (req, res) => {
+        const id = req.params.id;
 
         for(let i = 0;i<req.body.operational_day.length; i++){
             Operational.create({
                 operational_day: req.body.operational_day[i],
                 operational_timeOpen: req.body.operational_timeOpen[i],
                 operational_timeClose: req.body.operational_timeClose[i],
-                venue_id: venue_id
+                venue_id: id
             });
         }
     }

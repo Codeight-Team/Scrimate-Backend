@@ -10,6 +10,7 @@ exports.createField = ( req, res) => {
     let image_path;
     if(req.file){
         image_path = req.file.path.substr(11);
+        image_path = image_path.replace(/\s+/g, '_');
     }
     const field = {
         field_name: req.body.field_name,
@@ -71,7 +72,7 @@ const storage = multer.diskStorage({
         cb(null, 'app/assets/images/fields')
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + req.body.field_name + path.extname(file.originalname))
+        cb(null, Date.now() + req.body.field_name.replace(/\s+/g, '_') + path.extname(file.originalname))
     }
 })
 

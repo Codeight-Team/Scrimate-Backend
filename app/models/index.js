@@ -74,17 +74,20 @@ db.venues.belongsTo(db.sports, {
   },
 });
 //2. Venue - ADDRESS
-db.address.hasMany(db.venues, {
+db.address.hasOne(db.venues, {
   foreignKey: {
     name: "address_id",
     allowNull: false
-  }
+  },
+  
 });
 db.venues.belongsTo(db.address, {
   foreignKey: {
     name: "address_id",
     allowNull: false
-  }
+  },
+  onDelete: 'cascade',
+  hooks: true
 });
 //-------------------------------------------
 //OPERATIONAL RELATION

@@ -69,3 +69,10 @@ exports.update = (req, res) => {
             });
         });
 };
+
+exports.delete = async (req,res) =>  {
+const id = req.params.id;
+
+const address = await Address.findOne({ where: { address_id: id } });
+await address.destroy();
+}
