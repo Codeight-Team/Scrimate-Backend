@@ -89,6 +89,19 @@ db.venues.belongsTo(db.address, {
   onDelete: 'cascade',
   hooks: true
 });
+//3. Venue - User
+db.users.hasMany(db.venues, {
+  foreignKey: {
+    name: "user_id",
+    allowNull: false
+  }
+})
+db.venues.belongsTo(db.users, {
+  foreignKey: {
+    name: "user_id",
+    allowNull: false
+  }
+})
 //-------------------------------------------
 //OPERATIONAL RELATION
 db.venues.hasMany(db.operationals, {
