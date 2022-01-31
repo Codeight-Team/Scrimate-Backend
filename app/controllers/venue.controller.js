@@ -1,6 +1,5 @@
 const db = require("../models");
 const Venue = db.venues;
-const Operational = db.operationals;
 const Op = db.Sequelize.Op;
 const multer = require('multer');
 const path = require('path');
@@ -9,22 +8,24 @@ exports.createVenue = (sport_id, address_id, req, res) => {
     let image_path;
     if(req.file){
         image_path = req.file.path.substr(11);
+        image_path = image_path.replace(/\s+/g, '_');
     }
+
+    console.log(req.body)
     
     const venue = {
         venue_name: req.body.venue_name,
         venue_facility: req.body.venue_facility,
         venue_description: req.body.venue_description,
         image: image_path,
-        isOpen: req.body.isOpen,
+        isOpen: false,
         sport_id: sport_id,
         address_id: address_id
     };
 
     return Venue.create(venue)
-        .then(async venues => {
+        .then(venues => {
             res.send("Venue Created");
-            await Operational.createOperationalHour(venues.venue_id, req);
         })
         .catch(err => {
             res.status(500).send({ message: err.message + "Venue" });
@@ -96,7 +97,7 @@ const storage = multer.diskStorage({
         cb(null, 'app/assets/images/venues')
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + req.body.venue_name + path.extname(file.originalname))
+        cb(null, Date.now() + req.body.venue_name.replace(/\s+/g, '_') + path.extname(file.originalname))
     }
 })
 
@@ -113,3 +114,20 @@ exports.upload = multer({
         cb('Give proper file formate')
     }
 }).single('image')
+
+exports.delete = async (req, res) => {
+    const id = req.params.id;
+
+    const venue =  await Venue.findOne({
+        where:{
+            venue_id: id
+        },
+    })
+    .then( result => {
+        if(!result){
+            res.status(500).send({ message: "Venue not found" })
+        }
+    } );
+
+    await venue.destroy();
+}
