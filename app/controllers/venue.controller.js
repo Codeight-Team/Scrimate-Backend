@@ -5,14 +5,12 @@ const multer = require('multer');
 const path = require('path');
 
 exports.createVenue = (sport_id, address_id, req, res) => {
+    const id = req.params.id;
     let image_path;
     if(req.file){
         image_path = req.file.path.substr(11);
         image_path = image_path.replace(/\s+/g, '_');
-    }
-
-    console.log(req.body)
-    
+    }    
     const venue = {
         venue_name: req.body.venue_name,
         venue_facility: req.body.venue_facility,
@@ -20,7 +18,8 @@ exports.createVenue = (sport_id, address_id, req, res) => {
         image: image_path,
         isOpen: false,
         sport_id: sport_id,
-        address_id: address_id
+        address_id: address_id,
+        user_id: id
     };
 
     return Venue.create(venue)
@@ -123,11 +122,20 @@ exports.delete = async (req, res) => {
             venue_id: id
         },
     })
-    .then( result => {
+    .then( (result) => {
         if(!result){
             res.status(500).send({ message: "Venue not found" })
         }
+        return result;
     } );
 
-    await venue.destroy();
+    await venue.destroy()
+    .then(() => {
+        res.send({ message: "Delete Success" })
+    })
+    .catch(err => {
+        res.status(500).send({
+            message: "Error when delete venue: " + err.message
+        })
+    });
 }

@@ -12,7 +12,7 @@ module.exports = app => {
 
     var router = require("express").Router();
 
-    router.post('/insert-new-venue', venueController.upload , async (req, res, next) => {
+    router.post('/insert-new-venue/:id', venueController.upload , async (req, res, next) => {
         try {
             multer().array();
             const address = await addressController.createAddress({
