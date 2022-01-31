@@ -40,6 +40,8 @@ module.exports = app => {
         }
     })
 
+    router.get('/get-my-venue/:id', venueController.getMyVenue)
+
     //delete a venue
     router.delete('/delete-a-venue/:id', venueController.delete);
 

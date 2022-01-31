@@ -139,3 +139,34 @@ exports.delete = async (req, res) => {
         })
     });
 }
+
+exports.getMyVenue = (req, res) => {
+    const id = req.params.id;
+
+    return Venue.findAll({
+        where: {
+            user_id: id
+        },
+        include: [
+            {
+                model: db.address
+            },
+            {
+                model: db.fields,
+                as: "field"
+            }
+        ]
+    })
+    .then( num => {
+        if(!num){
+            res.status(404).send({
+                message: "This user doesnt have any venue"
+            })
+        }else{
+            res.send(num)
+        }
+    } )
+    .catch(err => {
+        res.status(500).send({ message: "error while getting venue: " + err.message })
+    })
+}
