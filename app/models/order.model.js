@@ -6,9 +6,15 @@ module.exports = (sequelize, Sequelize) => {
           allowNull: false,
           primaryKey: true
         },
-        order_type: {
+        order_status: {
           type: Sequelize.STRING
-        }  
+        },
+        date_of_match: {
+          type: Sequelize.DATEONLY
+        },
+        time_of_match: {
+          type: Sequelize.TIME
+        }
     });
 
     return Order;

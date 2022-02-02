@@ -35,6 +35,8 @@ db.fields = require("./field.model")(sequelize, Sequelize);
 db.schedules = require("./schedule.model")(sequelize, Sequelize);
 db.operationals = require("./operational.model")(sequelize, Sequelize);
 db.ratings = require("./rating.model")(sequelize, Sequelize);
+db.bills = require("./bill.model")(sequelize, Sequelize);
+db.transactions = require("./transaction.model")(sequelize, Sequelize);
 db.conversations = require("./conversation.model")(mongoose);
 db.messages = require("./message.model")(mongoose);
 
@@ -211,49 +213,86 @@ db.venues.hasMany(db.ratings, {
 //ORDER RELATION
 //1. order - user
 db.users.hasMany(db.orders, {
-  as: "order",
+  as: "creator_order",
   foreignKey: {
-    name: "user_id",
+    name: "creator_id",
     allowNull: false
+  }
+});
+db.users.hasMany(db.orders, {
+  as: "finder_order",
+  foreignKey: {
+    name: "finder_id",
+    allowNull: true
   }
 });
 db.orders.belongsTo(db.users, {
   foreignKey: {
+    name: "creator_id",
+    allowNull: false
+  },
+  otherKey: {
+    name:"finder_id",
+    allowNull: true
+  }
+});
+//2. order - venue
+db.fields.hasMany(db.orders, {
+  as: "order",
+  foreignKey: {
+    name: "field_id",
+    allowNull: false
+  }
+});
+db.orders.belongsTo(db.fields, {
+  foreignKey: {
+    name: "field_id",
+    allowNull: false
+  }
+});
+//-------------------------
+//BILL REALTIONS
+//1 ORDER - BILL
+db.orders.hasMany(db.bills, {
+  foreignKey: {
+    name: "order_id",
+    allowNull: false
+  }
+})
+db.bills.belongsTo(db.orders, {
+  foreignKey: {
+    name: "order_id",
+    allowNull: false
+  }
+})
+//2.USER - BILL
+db.users.hasMany(db.bills, {
+  foreignKey: {
     name: "user_id",
-    as: "user",
     allowNull: false
   }
-});
-//2. order - sports
-db.sports.hasOne(db.orders, {
-  as: "order",
+})
+db.bills.belongsTo(db.users, {
   foreignKey: {
-    name: "sport_id",
+    name: "user_id",
     allowNull: false
   }
-});
-db.orders.belongsTo(db.sports, {
+})
+//-------------------------
+//TRANSACTION RELATION
+//1. BILL - TRANSACTION
+db.bills.hasOne(db.transactions, {
   foreignKey: {
-    name: "sport_id",
-    as: "sport",
+    name: "bill_id",
     allowNull: false
   }
-});
-//3. order - venue
-db.venues.hasOne(db.orders, {
-  as: "order",
+})
+db.transactions.belongsTo(db.bills, {
   foreignKey: {
-    name: "venue_id",
+    name: "bill_id",
     allowNull: false
   }
-});
-db.orders.belongsTo(db.venues, {
-  foreignKey: {
-    name: "venue_id",
-    as: "venue",
-    allowNull: false
-  }
-});
+})
 //-------------------------
 
 //ROLE RELATIONS

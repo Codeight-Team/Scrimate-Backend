@@ -36,7 +36,15 @@ exports.findUserById = (user_id) => {
           WHERE orders.user_id = user_id
         )`), 'Match_Played']
       ]
-    }
+    },
+    include: [
+      {
+        model: db.address,
+        attributes: [
+          address_region
+        ]
+      }
+    ]
   })
 };
 

@@ -5,8 +5,12 @@ module.exports = app => {
     var multer = require("multer");
 
     router.post('/create-field/:id', fieldController.upload , async (req, res , next) => {
-        multer().array();
-        fieldController.createField(req,res);
+        try {
+            multer().array();
+            fieldController.createField(req,res);
+        } catch (err) {
+            return next(err);
+        }
     } )
     router.get('/get-fields/:id', fieldController.getFields);
 
