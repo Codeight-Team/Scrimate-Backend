@@ -58,7 +58,7 @@ require("./app/routes/order.routes")(app);
 require("./app/routes/field.routes")(app);
 require("./app/routes/matchMaking.routes")(app);
 require("./app/routes/messager.routes")(app);
-require("./app/routes/midtrans.routes")(app);
+require("./app/routes/payment.routes")(app);
 
 
 

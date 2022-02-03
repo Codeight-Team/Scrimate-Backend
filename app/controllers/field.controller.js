@@ -14,8 +14,8 @@ exports.createField = ( req, res) => {
     }
     const field = {
         field_name: req.body.field_name,
-        field_price: req.body.field_name,
-        field_type: req.body.field_name,
+        field_price: req.body.field_price,
+        field_type: req.body.field_type,
         image: image_path,
         venue_id: id,
     }

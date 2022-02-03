@@ -33,10 +33,18 @@ exports.findUserById = (user_id) => {
         [db.sequelize.literal(`(
           SELECT COUNT(*)
           FROM orders as orders
-          WHERE orders.user_id = user_id
+          WHERE orders.creator_id = user_id OR orders.finder_id = user_id
         )`), 'Match_Played']
       ]
-    }
+    },
+    include: [
+      {
+        model: db.address,
+        attributes: [
+          'address_region' 
+        ]
+      }
+    ]
   })
 };
 
