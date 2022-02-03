@@ -16,7 +16,7 @@ exports.createVenue = (sport_id, address_id, req, res) => {
         venue_facility: req.body.venue_facility,
         venue_description: req.body.venue_description,
         image: image_path,
-        isOpen: false,
+        isOpen: true,  //jangan lupa ganti false
         sport_id: sport_id,
         address_id: address_id,
         user_id: id
@@ -74,19 +74,48 @@ exports.getVenueBySportAndRegion = (req) => {
                     sport_name: sport_name
                 }
             },
-            {
-                model: db.ratings,
-                as: 'venue_rating',
-                //separate: true,
-
-
-            },
-            {
-                model: db.operationals
-            }
 
 
         ],
+    });
+
+}
+
+exports.venueDetail = () => {
+    const id = req.params.id;
+
+    Venue.findOne({
+        where: {
+            venue_id: id
+        },
+        attributes: {
+            include:
+                [
+                    [db.sequelize.literal(`(
+                            SELECT ROUND(AVG(rating_num)) as average
+                            FROM ratings
+                            WHERE ratings.venue_id = venue.venue_id
+                        )`), 'Average']
+                ],
+        },
+        include: [
+            {
+                model: db.operationals
+            },
+            {
+                model: db.address
+            },
+            {
+                model: db.ratings,
+                as: 'venue_rating',
+            }
+        ]
+    })
+    .then( (venues) => {
+        res.send(venues)
+    } )
+    .catch(err => {
+        res.status(500).send({ message: err.message + "Venue" });
     });
 
 }

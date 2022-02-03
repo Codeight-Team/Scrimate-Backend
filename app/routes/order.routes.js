@@ -15,13 +15,16 @@ module.exports = app => {
 
     });
 
-    router.post('/find-my-order/:id', orderController.findMyOrder)
+    router.get('/find-upcoming-order/:id', 
+        orderController.upcomingOrder )
 
-    router.post('/find-a-order/:id', orderController.findOrderById);
+    router.get('/find-my-order/:id', orderController.listMyOrder)
 
-    router.put('/update-status/:id', function (req, res) {
-        orderController.updateStatus
-    })
+    router.get('/find-a-order/:id/:order_id', orderController.findOrderById);
+
+    router.get('/find-order-history/:id', orderController.myOrderHistory)
+
+    router.put('/update-status/:id', orderController.updateStatus)
 
     app.use('/api/order', router);
 

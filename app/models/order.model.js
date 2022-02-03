@@ -6,6 +6,9 @@ module.exports = (sequelize, Sequelize) => {
           allowNull: false,
           primaryKey: true
         },
+        order_type: {
+          type: Sequelize.STRING
+        },
         order_status: {
           type: Sequelize.STRING
         },

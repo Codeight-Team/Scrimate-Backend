@@ -11,6 +11,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         schedule_time: {
             type: Sequelize.TIME
+        },
+        generate: {
+            type: Sequelize.STRING
         }
     });
     

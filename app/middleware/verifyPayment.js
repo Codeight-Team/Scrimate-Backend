@@ -3,6 +3,7 @@ const Bill = db.bills;
 const Field = db.fields;
 const Op = db.Sequelize.Op;
 
+
 isFieldBooked = async (req, res , next) => {
     const bill = await Bill.findOne({
         raw: true,
@@ -84,8 +85,26 @@ isFieldBooked = async (req, res , next) => {
     
 }
 
+checkSignatureKey = async (req, res, next) => {
+    var sha512 = require('js-sha512');
+    const serverKey = "SB-Mid-server-41M6ioekupI5A6k4dCfM_0py"
+    const signatureKey = req.body.signature_key;
+
+    const result = await sha512(req.body.order_id + req.body.status_code + req.body.gross_amount + serverKey);
+
+    if(result != signatureKey){
+        return res.status(500).send({
+            message: "not authorize"
+        })
+    }
+    next();
+
+
+}
+
 const verifyPayment = {
     isFieldBooked: isFieldBooked,
+    checkSignatureKey: checkSignatureKey,
 };
 
 module.exports =  verifyPayment;

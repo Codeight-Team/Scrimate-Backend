@@ -11,7 +11,7 @@ module.exports = app => {
         midtransController.processOrder(req, res);
     });
 
-    router.post('/payment-handling/', midtransController.handlingNotification)
+    router.post('/payment-handling/', [verifyPayment.checkSignatureKey], midtransController.handlingNotification)
 
     app.use('/api/payment', router);
 }
