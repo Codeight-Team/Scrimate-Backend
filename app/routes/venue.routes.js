@@ -31,14 +31,7 @@ module.exports = app => {
 
     router.post('/create-operationalhour/:id', Operational.createOperationalHour)
 
-    router.get('/get-venue', async (req, res, next) => {
-        try {
-            const venue = await venueController.getVenueBySportAndRegion(req);
-            res.send(venue);
-        } catch (err) {
-            next(err)
-        }
-    })
+    router.post('/get-venue', venueController.getVenueBySportAndRegion)
 
     router.get('/get-my-venue/:id', venueController.getMyVenue)
 

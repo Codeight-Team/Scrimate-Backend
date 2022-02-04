@@ -42,8 +42,8 @@ exports.findIdByName = (req) => {
 }
 
 exports.getVenueBySportAndRegion = (req,res) => {
-    var sport_name = req.params.sport_name;
-    var address_region = req.params.address_region;
+    var sport_name = req.body.sport_name;
+    var address_region = req.body.address_region;
 
      Venue.findAll({
         where: {
