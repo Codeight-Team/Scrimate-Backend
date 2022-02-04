@@ -31,7 +31,7 @@ module.exports = app => {
 
     router.post('/create-operationalhour/:id', Operational.createOperationalHour)
 
-    router.post('/get-venue/:sport/:region', venueController.getVenueBySportAndRegion)
+    router.post('/get-venue', venueController.getVenueBySportAndRegion)
 
     router.get('/get-my-venue/:id', venueController.getMyVenue)
 
