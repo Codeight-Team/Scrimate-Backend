@@ -44,7 +44,7 @@ module.exports = app => {
 
     router.get('/venue-detail/:id', venueController.venueDetail)
 
-    router.put('/update-status', venueController.statusVenue)
+    router.put('/update-status/:id', venueController.statusVenue)
 
     //delete a venue
     router.delete('/delete-a-venue/:id', venueController.delete);
