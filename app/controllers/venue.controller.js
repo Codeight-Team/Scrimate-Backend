@@ -16,7 +16,7 @@ exports.createVenue = (sport_id, address_id, req, res) => {
         venue_facility: req.body.venue_facility,
         venue_description: req.body.venue_description,
         image: image_path,
-        isOpen: true,  //jangan lupa ganti false
+        isOpen: false,  
         sport_id: sport_id,
         address_id: address_id,
         user_id: id
@@ -198,4 +198,32 @@ exports.getMyVenue = (req, res) => {
     .catch(err => {
         res.status(500).send({ message: "error while getting venue: " + err.message })
     })
+}
+
+exports.statusVenue = (req, res) => {
+    const id = req.params.id;
+    const isOpen = req.body.isOpen;
+
+    Venue.update(isOpen, {
+        where: {
+            venue_id: id
+        }
+    })
+    .then( num => {
+        if(num==1){
+            res.send({
+                message: "Update success, venue status is: " + isOpen ? "Open" : "Close"
+            })
+        }else{
+            res.status(404).send({
+                message: "Not Found"
+            })
+        }
+    })
+    .catch( err => {
+        res.status(500).send({
+            message: "Error: " + err.message
+        })
+    } )
+
 }

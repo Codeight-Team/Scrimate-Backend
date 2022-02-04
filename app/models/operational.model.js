@@ -22,11 +22,11 @@ module.exports = (sequelize, Sequelize) => {
     Operational.createOperationalHour = (req, res) => {
         const id = req.params.id;
 
-        for(let i = 0;i<req.body.operational_day.length; i++){
+        for(let i = 0;i<req.body.length; i++){
             Operational.create({
-                operational_day: req.body.operational_day[i],
-                operational_timeOpen: req.body.operational_timeOpen[i],
-                operational_timeClose: req.body.operational_timeClose[i],
+                operational_day: req.body[i].operational_day,
+                operational_timeOpen: req.body[i].operational_timeOpen,
+                operational_timeClose: req.body[i].operational_timeClose,
                 venue_id: id
             });
         }
