@@ -81,7 +81,7 @@ exports.getVenueBySportAndRegion = (req) => {
 
 }
 
-exports.venueDetail = () => {
+exports.venueDetail = (req, res) => {
     const id = req.params.id;
 
     Venue.findOne({

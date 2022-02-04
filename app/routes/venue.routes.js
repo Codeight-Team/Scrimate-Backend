@@ -42,6 +42,8 @@ module.exports = app => {
 
     router.get('/get-my-venue/:id', venueController.getMyVenue)
 
+    router.get('/venue-detail/:id', venueController.venueDetail)
+
     //delete a venue
     router.delete('/delete-a-venue/:id', venueController.delete);
 
