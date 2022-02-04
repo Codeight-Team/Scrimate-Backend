@@ -41,11 +41,11 @@ exports.findIdByName = (req) => {
 
 }
 
-exports.getVenueBySportAndRegion = (req) => {
-    var sport_name = req.body.sport_name;
-    var address_region = req.body.address_region;
+exports.getVenueBySportAndRegion = (req,res) => {
+    var sport_name = req.params.sport_name;
+    var address_region = req.params.address_region;
 
-    return Venue.findAll({
+     Venue.findAll({
         where: {
             isOpen: true
         },
@@ -77,6 +77,14 @@ exports.getVenueBySportAndRegion = (req) => {
 
 
         ],
+    })
+    .then((venues) => {
+        res.send(venues)
+    })
+    .catch(err => {
+        res.status(500).send({
+            message: "Error while getting venue: " + err.message
+        })
     });
 
 }
@@ -203,8 +211,7 @@ exports.getMyVenue = (req, res) => {
 exports.statusVenue = (req, res) => {
     const id = req.params.id;
     const isOpen = req.body.isOpen;
-
-    Venue.update(isOpen, {
+    Venue.update({isOpen: isOpen}, {
         where: {
             venue_id: id
         }
@@ -212,7 +219,7 @@ exports.statusVenue = (req, res) => {
     .then( num => {
         if(num==1){
             res.send({
-                message: "Update success, venue status is: " + isOpen ? "Open" : "Close"
+                message: "Update success, venue status is: " + isOpen
             })
         }else{
             res.status(404).send({
