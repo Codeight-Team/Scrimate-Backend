@@ -13,6 +13,7 @@ module.exports = app => {
         }
     } )
     router.get('/get-fields/:id', fieldController.getFields);
+    router.post('/field-schedule/:id', fieldController.getFieldSchedule);
 
     app.use('/api/field', router)
 }

@@ -42,6 +42,14 @@ exports.getFields = (req, res) => {
             venue_id: id
         }
     })
+    .then((fields)=>{
+        res.send(fields)
+    })
+    .catch(err=> {
+        res.status(500).send({
+            message: err.message
+        })
+    })
 }
 
 exports.getFieldSchedule = (req, res) => {
@@ -57,13 +65,38 @@ exports.getFieldSchedule = (req, res) => {
         where: {
             field_id: id
         },
-        attribute: [],
-        include: {
-            model: db.schedules,
-            where: {
-                schdule_date: date_choose
+        include: [
+            {
+                model: db.schedules,
+                where: {
+                    schdule_date: date_choose
+                }
+            },
+            {
+                model: db.bills,
+                where: {
+                    [Op.and]: [
+                        {  
+                            [Op.or]: [
+                                {bill_status: "pending"},
+                                {bill_status: "settlement"} 
+                            ]
+                        },
+                        {'$order.date_of_match$': date_choose}
+                    
+                    ]
+                },
+                include: [
+                    {
+                        model: db.orders,
+                        as: "order"
+                    }
+                ]
             }
-        }
+        ]     
+    })
+    .then((schedules) => {
+        res.send(schedules);
     })
 }
 
