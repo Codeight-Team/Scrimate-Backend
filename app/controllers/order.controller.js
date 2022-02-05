@@ -5,9 +5,10 @@ const Op = db.Sequelize.Op;
 
 //Create order
 exports.createOrder = (creator_id, field_id,req) => {
+    const order_type = req.body.order_type;
     
     const order = {
-        order_status: "On Going",
+        order_status: order_type == 'Match' ? "Waiting" : "On Going",
         order_type: req.body.order_type,
         creator_id: creator_id,
         finder_id: null,
@@ -16,9 +17,8 @@ exports.createOrder = (creator_id, field_id,req) => {
         time_of_match: req.body.time_of_match,
     };
 
-    return Order.create(order)
+     return Order.create(order)
     .then( (data) => {
-        res.send({message: "Order Created"});
         return data;
     })
     .catch((err) => {

@@ -170,10 +170,14 @@ db.matchMaking.belongsTo(db.users, {
     name: "creator_id",
     allowNull: false
   },
-  otherKey: {
+  as: "creator"
+})
+db.matchMaking.belongsTo(db.users, {
+  foreignKey: {
     name: "finder_id",
-    allowNull: true
-  }
+    allowNull: false
+  },
+  as: "finder"
 })
 db.matchMaking.belongsTo(db.fields, {
   foreignKey: {
@@ -231,10 +235,14 @@ db.orders.belongsTo(db.users, {
     name: "creator_id",
     allowNull: false
   },
-  otherKey: {
-    name:"finder_id",
-    allowNull: true
-  }
+  as: "creator"
+});
+db.orders.belongsTo(db.users, {
+  foreignKey: {
+    name: "finder_id",
+    allowNull: false
+  },
+  as: "finder"
 });
 //2. order - venue
 db.fields.hasMany(db.orders, {
@@ -250,6 +258,16 @@ db.orders.belongsTo(db.fields, {
     allowNull: false
   }
 });
+db.orders.belongsToMany(db.matchMaking, {
+  through: "order_match",
+  as: "match",
+  foreignKey: "order_id"
+})
+db.matchMaking.belongsToMany(db.orders, {
+  through: "order_match",
+  as: "order",
+  foreignKey: "match_id"
+})
 //-------------------------
 //BILL REALTIONS
 //1 ORDER - BILL

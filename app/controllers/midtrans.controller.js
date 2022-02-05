@@ -7,6 +7,7 @@ const Order = db.orders;
 const Transaction = db.transactions;
 const Field = db.fields;
 const Schedule = db.schedules;
+const MatchMaking = db.matchMaking;
 const Op = db.Sequelize.Op;
 
 exports.processOrder = async (req, res) => {
@@ -120,7 +121,9 @@ exports.handlingNotification = (req, res) => {
             .then((order)=> {
                 if(order.order_type=="Match"){
                     if(order.finder_id == bill.user_id){
-                        order.update({finder_id: null})
+                        order.update({finder_id: null});
+                        const match = order.getMatch();
+                        match.update({ finder_id: null });
                     }
                 }
             })
@@ -162,6 +165,16 @@ exports.handlingNotification = (req, res) => {
                         }else if(order.order_type == "Match"){
                             if(order.finder_id == null) {
                                 order.update({order_status: "Waiting"})
+                                MatchMaking.create({
+                                    payement_distribution: 50,
+                                    date_of_match: order.date_of_match,
+                                    time_of_match: order.time_of_match,
+                                    creator_id: order.creator_id,
+                                    field_id: order.field_id
+                                })
+                                .then((match) => {
+                                    match.addOrder(order)
+                                })
                             } else{
                                 order.update({order_status: "Finish"})
                                 .then(()  => {

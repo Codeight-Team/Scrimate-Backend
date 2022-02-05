@@ -3,7 +3,7 @@ const Bill = db.bills;
 const Field = db.fields;
 const Op = db.Sequelize.Op;
 
-exports.createBill = async (order_id, req,res) => {
+exports.createBill = async (order_id, order_type, req,res) => {
     const field = await Field.findOne({
         raw: true,
         where: {
@@ -14,7 +14,7 @@ exports.createBill = async (order_id, req,res) => {
     const bill = {
         user_id: req.params.id,
         order_id: order_id,
-        bill_amount: field.field_price,
+        bill_amount: order_type == 'Match' ? field.field_price / 2 : field.field_price,
         bill_status: null
     }
 

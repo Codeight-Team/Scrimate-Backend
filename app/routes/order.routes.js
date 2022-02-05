@@ -10,7 +10,7 @@ module.exports = app => {
 
         const order = await orderController.createOrder(req.params.id, req.params.field_id, req, res);
 
-        billController.createBill(order.order_id, req, res)
+        billController.createBill(order.order_id,order.order_type, req, res)
 
 
     });
