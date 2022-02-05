@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         bill_status: {
-            type: Sequelize.BOOLEAN
+            type: Sequelize.STRING
         }
     })
 
