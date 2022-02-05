@@ -7,10 +7,13 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true
         },
         payment_distribution: {
-            type: Sequelize.STRING,
+            type: Sequelize.INTEGER,
         },
         date_of_match: {
-            type: Sequelize.DATE,
+            type: Sequelize.DATEONLY,
+        },
+        time_of_match: {
+            type: Sequelize.TIME,
         }
     });
 

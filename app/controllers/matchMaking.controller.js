@@ -1,13 +1,15 @@
 const db = require("../models");
 const MatchMaking = db.matchMaking;
+const Order = db.orders;
 const Op = db.Sequelize.Op;
 
-exports.createMatch = (creator_id, field_id, req, res) => {
+exports.createMatch = (req, res) => {
     const matchMaking = {
-        payemnt_distribution: req.body.payemnt_distribution,
+        payement_distribution: 50,
         date_of_match: req.body.date_of_match,
-        creator_id: creator_id,
-        field_id: field_id
+        time_of_match: req.body.time_of_match,
+        creator_id: req.params.id,
+        field_id: req.params.field_id
     }
 
     return MatchMaking.create(matchMaking)
@@ -21,13 +23,11 @@ exports.createMatch = (creator_id, field_id, req, res) => {
 
 exports.joinMatch = (req, res) => {
     const id = req.params.id;
-    const finder = {
-        finder_id: req.body.user_id
-    }
+    const match_id = req.params.match_id;
 
-    MatchMaking.update(finder, {
+    MatchMaking.update({finder_id: id}, {
         where: {
-            match_id: id
+            match_id: match_id
         }
     })
     .then( () => {
@@ -40,6 +40,28 @@ exports.joinMatch = (req, res) => {
             message: "Failed to join a match: " + err.message
         })
     })
+}
+
+exports.findOrderByMatch = (req,res) => {
+    const match_id = req.params.match_id;
+    const user_id = req.params.id;
+
+    return Order.findOne({
+        where: {
+            '$match.match_id$': match_id,
+        },
+        include: [
+            {
+                model:  db.matchMaking,
+                as: "match"
+            }
+        ]
+    })
+    .then((order) =>{
+        order.update({ finder_id: user_id })
+        return order
+    })
+
 }
 
 exports.updateMatch = (req, res) => {
@@ -88,13 +110,49 @@ exports.deleteMatch = (req, res) => {
 }
 
 exports.listMatch = (req, res) =>{
-    return MatchMaking.findAll({
+    const user_id = req.params.id;
+    const address_region = req.body.address_region;
+    const sport_name = req.body.sport_name;
+
+    MatchMaking.findAll({
         where: {
-            finder_id: null
-        }
+            finder_id: null,
+            // creator_id: {
+            //     [Op.ne]: user_id
+            // },
+            '$field.venue.address.address_region$': address_region,
+            '$field.venue.sport.sport_name$': sport_name
+        },
+        include: [
+            {
+                model: db.fields,
+                as: "field",
+                include: [
+                    {
+                        model: db.venues,
+                        as: "venue",
+                        include: [
+                            {
+                                model: db.address,
+                                as: "address"
+                            },
+                            {
+                                model: db.sports,
+                                as: "sport"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
     })
-    .then(match => {
-        return match;
+    .then((matches) => {
+        res.send(matches)
+    })
+    .catch(err => {
+        res.status(500).send({
+            message: "error while getting matches. Detail: " + err.message
+        })
     });
 }
 
@@ -108,5 +166,51 @@ exports.myMatch = (req, res) => {
     .then(match => {
         return match; 
     })
+}
+
+exports.getMatchDetail = (req,res) => {
+    const match_id = req.params.id;
+
+    MatchMaking.findOne({
+        where: {
+            match_id: match_id
+        },
+            include: [
+                {
+                    model: db.fields,
+                    as: "field",
+                    include: [
+                        {
+                            model: db.venues,
+                            as: "venue",
+                            include: [
+                                {
+                                    model: db.address,
+                                    as: "address"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    model: db.users,
+                    as: "creator"
+                },
+                {
+                    model: db.users,
+                    as: "finder"
+                }
+            ]
+        
+    })
+    .then( (match) => {
+        res.send(match)
+    } )
+    .catch(err => {
+        res.status(500).send({
+            message: err.message
+        })
+    })
+
 }
 

@@ -1,16 +1,23 @@
 module.exports = app => {
     const matchMaking = require("../controllers/matchMaking.controller");
+    const Order = require("../controllers/order.controller");
+    const Bill = require("../controllers/bill.controller");
 
     var router = require("express").Router();
 
-    router.post('/create-match',);
+    router.post('/create-match/:id/:field_id', matchMaking.createMatch);
+    router.post('/list-match/:id', matchMaking.listMatch);
+    router.get('/match-detail/:id', matchMaking.getMatchDetail);
+    router.put('/join/:id/:match_id', async (req,res) => {
+        const order = await matchMaking.findOrderByMatch(req);
 
-    app.use('/api/match-making', async (req,res,next) => {
-        try {
-            await matchMaking.createMatch(req.body.creator_id, req.body.venue_id, req, res);
-        } catch (err) {
-            next(err)
-        }
-    })
+        Bill.createBill(order.order_id, order.order_type, req)
+
+        matchMaking.joinMatch(req);
+        
+
+    });
+
+    app.use('/api/match-making', router)
 
 }
