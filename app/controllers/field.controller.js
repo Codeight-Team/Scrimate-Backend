@@ -1,6 +1,7 @@
 const db = require("../models");
 const Field = db.fields;
 const Schedule = db.schedules;
+const Order = db.orders;
 const Op = db.Sequelize.Op;
 const multer = require('multer');
 const path = require('path');
@@ -52,7 +53,7 @@ exports.getFields = (req, res) => {
     })
 }
 
-exports.getFieldSchedule = (req, res) => {
+exports.getFieldSchedule = async(req, res) => {
     if(!req.params.id){
         return res.status(500).send({
             message: "Require field ID for get field schedule"
@@ -60,44 +61,69 @@ exports.getFieldSchedule = (req, res) => {
     }
     const id = req.params.id
     const date_choose = req.body.date_choose;
+
+    const times = [];
     
-    Field.findOne({
+    Schedule.findAll({
+        raw: true,
         where: {
-            field_id: id
+            '$field.field_id$': id,
+            schedule_date: date_choose
         },
+        attributes: [
+            'schedule_time'
+        ],
         include: [
             {
-                model: db.schedules,
-                where: {
-                    schdule_date: date_choose
-                }
-            },
-            {
-                model: db.bills,
-                where: {
-                    [Op.and]: [
-                        {  
-                            [Op.or]: [
-                                {bill_status: "pending"},
-                                {bill_status: "settlement"} 
-                            ]
-                        },
-                        {'$order.date_of_match$': date_choose}
-                    
-                    ]
-                },
-                include: [
-                    {
-                        model: db.orders,
-                        as: "order"
-                    }
-                ]
+                model:db.fields,
+                as: "field",
+                attributes: []
             }
-        ]     
+        ]
     })
     .then((schedules) => {
-        res.send(schedules);
+        if(schedules!=null){
+            for(let i = 0 ; i < schedules.length ; i++){
+                times.push(schedules.schedule_time)
+            }
+        }
     })
+
+    Order.findAll({
+        raw: true,
+        where: {
+            [Op.and]:
+            [
+                {date_of_match: date_choose},
+                {
+                    [Op.or]:
+                    [
+                        {'$bills.bill_status$': "pending"},
+                        {'$bills.bill_status$': "settlement"},
+                    ]
+                }
+            ]
+        },
+        attributes: [
+            'time_of_match'
+        ],
+        include: [
+            {
+                model: db.bills,
+                as: "bills"
+            }
+        ]
+    })
+    .then((result) => {
+        if(result!=0){
+            for(let i = 0; i< result.length; i++){
+                times.push(result.time_of_match)
+            }
+        }
+    })
+
+    res.send({times})
+    
 }
 
 const storage = multer.diskStorage({
