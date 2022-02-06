@@ -64,7 +64,7 @@ exports.getFieldSchedule = async(req, res) => {
 
     const times = [];
     
-    Schedule.findAll({
+    await Schedule.findAll({
         raw: true,
         where: {
             '$field.field_id$': id,
@@ -83,14 +83,15 @@ exports.getFieldSchedule = async(req, res) => {
     })
     .then((schedules) => {
         if(schedules!=null){
-            for(let i = 0 ; i < schedules.length ; i++){
-                times.push(schedules.schedule_time)
-            }
+            schedules.map(item => (
+                times.push(item.schedule_time)
+            ))
         }
     })
 
-    Order.findAll({
+    await Order.findAll({
         raw: true,
+        nest:true,
         where: {
             [Op.and]:
             [
@@ -116,9 +117,9 @@ exports.getFieldSchedule = async(req, res) => {
     })
     .then((result) => {
         if(result!=0){
-            for(let i = 0; i< result.length; i++){
-                times.push(result.time_of_match)
-            }
+            result.map(item => (
+                times.push(item.time_of_match)
+            ))
         }
     })
 
