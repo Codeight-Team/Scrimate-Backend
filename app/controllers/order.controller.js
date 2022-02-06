@@ -35,7 +35,26 @@ exports.listMyOrder = (req, res) => {
      Order.findAll({
         where: {
             [Op.or]: [{creator_id: id}, {finder_id: id}]
-        }
+        },
+        include: [
+            {
+                model: db.fields,
+                as: "field",
+                include: [
+                    {
+                        model: db.venues,
+                        as: "venue"
+                    }
+                ]
+            },
+            {
+                model: db.bills,
+                as: "bills",
+                where:{
+                    user_id: id
+                }
+            }
+        ]
     })
     .then( (data) => {
         res.send(data)
