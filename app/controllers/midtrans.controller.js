@@ -88,7 +88,7 @@ exports.processOrder = async (req, res) => {
 
 }
 
-exports.handlingNotification = (req, res) => {
+exports.handlingNotification = async (req, res) => {
     const transaction_status = req.body.transaction_status;
 
     const pendingHandling = async function () {
@@ -99,6 +99,16 @@ exports.handlingNotification = (req, res) => {
                     [Op.eq]: req.body.order_id
                 }
             }
+        })
+        .then( num => {
+            if (num == 1){
+                res.send({ message: "success" })
+            }else{
+                res.send({ message: "Error" })
+            }
+        })
+        .catch(err => {
+            res.send(err.message)
         })
     }
 
@@ -213,7 +223,7 @@ exports.handlingNotification = (req, res) => {
 
     switch (transaction_status) {
         case "pending":
-            pendingHandling();
+            await pendingHandling();
             break;
         case "expire":
             expireHandling();
