@@ -7,7 +7,7 @@ module.exports = app => {
 
     var router = require("express").Router();
 
-    router.get('/process-order/:id/:bill_id',[verifyPayment.isFieldBooked], async (req, res, next) => {
+    router.post('/process-order/:id/:bill_id',[verifyPayment.isFieldBooked], async (req, res, next) => {
         midtransController.processOrder(req, res);
     });
 
