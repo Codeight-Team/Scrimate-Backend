@@ -31,9 +31,7 @@ exports.joinMatch = (req, res) => {
         }
     })
     .then( () => {
-        res.send({
-            message: "Success join the match"
-        })
+        console.log("Success");
     })
     .catch(err => {
         res.status(500).send({
@@ -47,13 +45,16 @@ exports.findOrderByMatch = (req,res) => {
     const user_id = req.params.id;
 
     return Order.findOne({
-        where: {
-            '$match.match_id$': match_id,
-        },
+        // where: {
+        //     '$match.match_id$': match_id,
+        // },
         include: [
             {
                 model:  db.matchMaking,
-                as: "match"
+                as: "match",
+                where: {
+                    match_id: match_id
+                }
             }
         ]
     })

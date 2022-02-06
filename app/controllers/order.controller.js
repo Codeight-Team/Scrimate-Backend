@@ -8,7 +8,7 @@ exports.createOrder = (creator_id, field_id,req) => {
     const order_type = req.body.order_type;
     
     const order = {
-        order_status: order_type == 'Match' ? "Waiting" : "On Going",
+        order_status: "On Going",
         order_type: req.body.order_type,
         creator_id: creator_id,
         finder_id: null,

@@ -50,7 +50,7 @@ isFieldBooked = async (req, res , next) => {
                     }, 
                 },
                 {
-                    '$order.time_match$': {
+                    '$order.time_of_match$': {
                         [Op.eq]: bill.order.time_of_match
                     }
                 }

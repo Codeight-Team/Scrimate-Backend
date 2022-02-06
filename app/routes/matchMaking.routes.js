@@ -9,11 +9,9 @@ module.exports = app => {
     router.post('/list-match/:id', matchMaking.listMatch);
     router.get('/match-detail/:id', matchMaking.getMatchDetail);
     router.put('/join/:id/:match_id', async (req,res) => {
-        const order = await matchMaking.findOrderByMatch(req);
-
-        Bill.createBill(order.order_id, order.order_type, req)
-
+        const order = await matchMaking.findOrderByMatch(req, res);
         matchMaking.joinMatch(req);
+        Bill.createBill(order.order_id, order.order_type, req, res)
         
 
     });
