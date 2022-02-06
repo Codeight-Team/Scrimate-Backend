@@ -21,7 +21,7 @@ exports.createBill = async (order_id, order_type, req,res) => {
     Bill.create(bill)
     .then( () => {
         res.send({
-            message: "Bill Created"
+            message: "Bill Created", order_id
         })
     })
     .catch( err => {

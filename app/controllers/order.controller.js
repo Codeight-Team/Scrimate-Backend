@@ -54,15 +54,23 @@ exports.findOrderById = (req, res) => {
     const order_id = req.params.order_id;
 
     Order.findOne({
+        raw:true,
+        nest: true,
         where: {
             order_id: order_id
         },
         include: [
             {
-                model: db.users
+                model: db.users,
+                as: "creator"
+            },
+            {
+                model: db.users,
+                as: "finder"
             },
             {
                 model: db.bills,
+                as: "bills",
                 where: {
                     user_id: id
                 }
@@ -71,15 +79,26 @@ exports.findOrderById = (req, res) => {
                 model: db.fields,
                 include: [
                     {
-                        model: db.address
+                        model: db.venues,
+                        as: "venue",
+                        include: [
+                            {
+                                model: db.address,
+                                as: "address"
+                            }
+                        ]
                     }
                 ]
             }
         ]
     })
     .then( (data) => {
+         const expire = data.bills.bill_status == "pending" ? data.updatedAt : null;
+        if(expire!=null){
+            expire.setMinutes(expire.getMinutes() + 15);
+        }
         if(data){
-            res.send(data);
+            res.send({data, expire});
         }else{
             res.status(400).send({
                 message: "Order not found"
@@ -145,7 +164,13 @@ exports.myOrderHistory = (req,res) => {
                     ]
                 }
             ]
-        }
+        },
+        include: [
+            {
+                model: db.fields,
+                as: "field"
+            }
+        ]
     })
     .then((result) => {
         res.send(result)
