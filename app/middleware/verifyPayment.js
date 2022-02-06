@@ -19,6 +19,7 @@ isFieldBooked = async (req, res , next) => {
         include: [
             {
                 model: db.orders,
+                as: "order",
                 attributes: [
                     'date_of_match',
                     'time_of_match'
@@ -31,18 +32,29 @@ isFieldBooked = async (req, res , next) => {
         raw: true,
         nest: true,
         where: {
-            bill_id: {
-                [Op.ne]: req.params.bill_id
-            },
-            bill_status: {
-                [Op.eq] : "pending"
-            },
-            '$order.date_of_match$': {
-                [Op.eq]: bill.order.date_of_match
-            }, 
-            '$order.time_match$': {
-                [Op.eq]: bill.order.time_of_match
-            }
+            [Op.and]: 
+            [
+                {
+                    bill_id: {
+                        [Op.ne]: req.params.bill_id
+                    }
+                },
+                {
+                    bill_status: {
+                        [Op.eq] : "pending"
+                    }
+                },
+                {
+                    '$order.date_of_match$': {
+                        [Op.eq]: bill.order.date_of_match
+                    }, 
+                },
+                {
+                    '$order.time_match$': {
+                        [Op.eq]: bill.order.time_of_match
+                    }
+                }
+            ] 
         },
         include: [
             {
@@ -71,11 +83,11 @@ isFieldBooked = async (req, res , next) => {
         ]
     })
 
-    if(billBooked != null){
+    if(billBooked.order != null){
         return res.status(406).send({
             message: "Cannot process, There are already bill on progress"
         })
-    }else if (scheduleBooked != null){
+    }else if (scheduleBooked.schedule != null){
         return res.status(406).send({
             message: "Cannot process, field with specific time already booked"
         })
