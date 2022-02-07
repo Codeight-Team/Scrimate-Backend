@@ -1,4 +1,3 @@
-const res = require("express/lib/response");
 const db = require("../models");
 const Order = db.orders;
 const Op = db.Sequelize.Op;
