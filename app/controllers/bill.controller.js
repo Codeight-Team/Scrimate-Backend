@@ -40,11 +40,9 @@ exports.createBill = async (order_id, order_type, req,res) => {
         bill_status: null
     }
 
-    Bill.create(bill)
-    .then( () => {
-        res.send({
-            message: "Bill Created", order_id
-        })
+    return Bill.create(bill)
+    .then( (data) => {
+        return data;
     })
     .catch( err => {
         res.status(500).send({

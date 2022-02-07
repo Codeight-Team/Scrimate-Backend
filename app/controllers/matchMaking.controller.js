@@ -59,8 +59,8 @@ exports.findOrderByMatch = (req,res) => {
         ]
     })
     .then((order) =>{
-        order.update({ finder_id: user_id })
-        return order
+        order.update({ finder_id: user_id });
+        return order;
     })
 
 }
@@ -144,6 +144,10 @@ exports.listMatch = (req, res) =>{
                         ]
                     }
                 ]
+            },
+            {
+                model: db.users,
+                as: "creator"
             }
         ]
     })
@@ -162,10 +166,43 @@ exports.myMatch = (req, res) => {
     return MatchMaking.findAll({
         where: {
             [Op.or]: [{creator_id: id}, {finder_id: id}]
-        }
+        },
+        include: [
+            {
+                model: db.fields,
+                as: "field",
+                include: [
+                    {
+                        model: db.venues,
+                        as: "venue",
+                        include: [
+                            {
+                                model: db.address,
+                                as: "address"
+                            },
+                            {
+                                model: db.sports,
+                                as: "sport"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                model: db.users,
+                as: "creator"
+            },
+            {
+                model: db.users,
+                as: "finder"
+            }
+        ]
     })
-    .then(match => {
-        return match; 
+    .then((match) => {
+        res.send(match)
+    })
+    .catch(err => {
+        res.send({message: "Error while getting my match. DETAIL: " + err.message})
     })
 }
 
@@ -188,6 +225,10 @@ exports.getMatchDetail = (req,res) => {
                                 {
                                     model: db.address,
                                     as: "address"
+                                },
+                                {
+                                    model: db.sports,
+                                    as: "sport"
                                 }
                             ]
                         }
@@ -200,6 +241,10 @@ exports.getMatchDetail = (req,res) => {
                 {
                     model: db.users,
                     as: "finder"
+                },
+                {
+                    model: db.orders,
+                    as: "order"
                 }
             ]
         
