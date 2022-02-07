@@ -139,11 +139,13 @@ exports.handlingNotification = async (req, res) => {
                         order.update({finder_id: null});
                         const match = order.getMatch();
                         match.update({ finder_id: null });
+                    }else{
+                        order.update({ order_status: "Failed" })
                     }
                 }else{
                     order.update({ order_status: "Failed" })
-                    res.send({ message: "Success" })
                 }
+                res.send({ message: "Success" })
             })
         })
     }
