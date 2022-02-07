@@ -30,6 +30,7 @@ module.exports = (sequelize, Sequelize) => {
                 venue_id: id
             });
         }
+        res.send({message: "Hour Created"});
     }
 
     return Operational;
