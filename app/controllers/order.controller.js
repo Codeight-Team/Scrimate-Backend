@@ -3,7 +3,7 @@ const Order = db.orders;
 const Op = db.Sequelize.Op;
 
 //Create order
-exports.createOrder = (creator_id, field_id,req) => {
+exports.createOrder = (creator_id, field_id,req,res ) => {
     const order_type = req.body.order_type;
     
     const order = {
