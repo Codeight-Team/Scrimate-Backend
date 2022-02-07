@@ -69,7 +69,7 @@ exports.processOrder = async (req, res) => {
             "bank": req.body.payment_method
         },
         "custom_expiry": {
-            "expiry_duration": 1,
+            "expiry_duration": 10,
             "unit": "minute"
         }
     };
