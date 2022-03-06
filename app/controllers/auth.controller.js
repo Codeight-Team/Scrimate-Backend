@@ -26,7 +26,7 @@ exports.createUser = (address_id, req, res) => {
                 Role.findAll({
                     where: {
                         name: {
-                            [Op.eq]: req.body.role
+                            [Op.or]: req.body.role
                         }
                     }
                 }).then(role => {
