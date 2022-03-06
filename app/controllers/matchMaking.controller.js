@@ -253,7 +253,7 @@ exports.getMatchDetail = (req,res) => {
                     include: [
                         {
                             model: db.bills,
-                            as: "bill",
+                            as: "bills",
                             include: [
                                 {
                                     model: db.transactions,
