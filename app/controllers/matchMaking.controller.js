@@ -5,7 +5,7 @@ const Op = db.Sequelize.Op;
 
 exports.createMatch = (req, res) => {
     const matchMaking = {
-        payement_distribution: 50,
+        payment_distribution: 50,
         date_of_match: req.body.date_of_match,
         time_of_match: req.body.time_of_match,
         creator_id: req.params.id,
@@ -114,13 +114,17 @@ exports.listMatch = (req, res) =>{
     const user_id = req.params.id;
     const address_region = req.body.address_region;
     const sport_name = req.body.sport_name;
+    const dateNow = new Date();
 
     MatchMaking.findAll({
         where: {
             finder_id: null,
-            // creator_id: {
-            //     [Op.ne]: user_id
-            // },
+            creator_id: {
+                [Op.ne]: user_id
+            },
+            date_of_match: {
+                [Op.gte]: dateNow
+            },
             '$field.venue.address.address_region$': address_region,
             '$field.venue.sport.sport_name$': sport_name
         },
@@ -208,6 +212,7 @@ exports.myMatch = (req, res) => {
 
 exports.getMatchDetail = (req,res) => {
     const match_id = req.params.id;
+    const dateNow = new Date();
 
     MatchMaking.findOne({
         where: {
@@ -244,12 +249,31 @@ exports.getMatchDetail = (req,res) => {
                 },
                 {
                     model: db.orders,
-                    as: "order"
+                    as: "order",
+                    include: [
+                        {
+                            model: db.bills,
+                            as: "bill",
+                            include: [
+                                {
+                                    model: db.transactions,
+                                    as: "transaction"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         
     })
-    .then( (match) => {
+    .then( async (match) => {
+        let tempDate = new Date(match.dataValues.date_of_match);
+        let order;
+        if(tempDate.getTime() < new Date()){
+            order = await match.getOrder();
+            order = order[0];
+            order.update({order_status: "Invalid"});
+        }
         res.send(match)
     } )
     .catch(err => {

@@ -4,8 +4,7 @@ module.exports = app =>{
     var router = require("express").Router();
 
     //conversation
-    router.post('/create-conversation', messagerController.createConversation);
-    router.get('get-conversation/:id', messagerController.getConversation);
+    router.get('/get-conversation/:id', messagerController.getConversation);
 
     //Message
     router.post('/add-message', messagerController.addMessage);
