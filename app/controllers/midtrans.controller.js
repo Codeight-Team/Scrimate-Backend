@@ -8,6 +8,8 @@ const Transaction = db.transactions;
 const Field = db.fields;
 const Schedule = db.schedules;
 const MatchMaking = db.matchMaking;
+const Conversation = db.conversations;
+const Refund = db.refunds;
 const Op = db.Sequelize.Op;
 
 exports.processOrder = async (req, res) => {
@@ -69,7 +71,7 @@ exports.processOrder = async (req, res) => {
             "bank": req.body.payment_method
         },
         "custom_expiry": {
-            "expiry_duration": 10,
+            "expiry_duration": 15,
             "unit": "minute"
         }
     };
@@ -104,16 +106,16 @@ exports.handlingNotification = async (req, res) => {
                 }
             }
         })
-        .then( num => {
-            if (num == 1){
-                res.send({ message: "success" })
-            }else{
-                res.send({ message: "Error" })
-            }
-        })
-        .catch(err => {
-            res.send(err.message)
-        })
+            .then(num => {
+                if (num == 1) {
+                    res.send({ message: "success" })
+                } else {
+                    res.send({ message: "Error" })
+                }
+            })
+            .catch(err => {
+                res.send(err.message)
+            })
     }
 
     const expireHandling = async function () {
@@ -124,30 +126,30 @@ exports.handlingNotification = async (req, res) => {
                 }
             }
         })
-        .then((bill) => {
-            bill.update({ bill_status: transaction_status })
-            Order.findOne({
-                where: {
-                    order_id: {
-                        [Op.eq]: bill.order_id
+            .then((bill) => {
+                bill.update({ bill_status: transaction_status })
+                Order.findOne({
+                    where: {
+                        order_id: {
+                            [Op.eq]: bill.order_id
+                        }
                     }
-                }
+                })
+                    .then((order) => {
+                        if (order.order_type == "Match") {
+                            if (order.finder_id == bill.user_id) {
+                                order.update({ finder_id: null });
+                                const match = order.getMatch();
+                                match.update({ finder_id: null });
+                            } else {
+                                order.update({ order_status: "Failed" })
+                            }
+                        } else {
+                            order.update({ order_status: "Failed" })
+                        }
+                        res.send({ message: "Success" })
+                    })
             })
-            .then((order)=> {
-                if(order.order_type=="Match"){
-                    if(order.finder_id == bill.user_id){
-                        order.update({finder_id: null});
-                        const match = order.getMatch();
-                        match.update({ finder_id: null });
-                    }else{
-                        order.update({ order_status: "Failed" })
-                    }
-                }else{
-                    order.update({ order_status: "Failed" })
-                }
-                res.send({ message: "Success" })
-            })
-        })
     }
 
     const settlementHandling = async function () {
@@ -158,70 +160,109 @@ exports.handlingNotification = async (req, res) => {
                 }
             }
         })
-        .then((bill) => {
-            bill.update({ bill_status: transaction_status })
-            Order.findOne({
-                where: {
-                    order_id: {
-                        [Op.eq]: bill.order_id
+            .then((bill) => {
+                bill.update({ bill_status: transaction_status })
+                Order.findOne({
+                    where: {
+                        order_id: {
+                            [Op.eq]: bill.order_id
+                        }
                     }
-                }
-            })
-            .then((order) => {
-                if (order.order_type == "Single") {
-                    order.update({order_status: "Finish"})
-                    .then(()  => {
-                        Field.findByPk(order.field_id)
-                        .then((field) => {
-                            Schedule.create({
-                                schedule_date: order.date_of_match,
-                                schedule_time: order.time_of_match,
-                                generate: "app"
+                })
+                    .then(async (order) => {
+                        if (order.order_type == "Single") {
+                            order.update({ order_status: "Finish" })
+                                .then(() => {
+                                    Field.findByPk(order.field_id)
+                                        .then((field) => {
+                                            Schedule.create({
+                                                schedule_date: order.date_of_match,
+                                                schedule_time: order.time_of_match,
+                                                generate: "app"
+                                            })
+                                                .then((schedule) => {
+                                                    field.addSchedule(schedule);
+                                                })
+                                        })
+                                })
+                            Order.update({ order_status: "Invalid" }, {
+                                where: {
+                                    date_of_match: {
+                                        [Op.eq]: order.date_of_match
+                                    },
+                                    time_of_match: {
+                                        [Op.eq]: order.time_of_match
+                                    },
+                                    order_id: {
+                                        [Op.ne]: order.order_id
+                                    }
+                                }
                             })
-                            .then((schedule) => {
-                                field.addSchedule(schedule);
-                            })
-                        })
+                        } else if (order.order_type == "Match") {
+                            if (order.finder_id == null) {
+                                order.update({ order_status: "Waiting" })
+                                MatchMaking.create({
+                                    payement_distribution: 50,
+                                    date_of_match: order.date_of_match,
+                                    time_of_match: order.time_of_match,
+                                    creator_id: order.creator_id,
+                                    field_id: order.field_id
+                                })
+                                    .then((match) => {
+                                        match.addOrder(order)
+                                    })
+                            } else {
+                                order.update({ order_status: "Finish" })
+                                    .then(() => {
+                                        Field.findByPk(order.field_id)
+                                            .then((field) => {
+                                                Schedule.create({
+                                                    schedule_date: order.date_of_match,
+                                                    schedule_time: order.time_of_match,
+                                                    generate: "app"
+                                                })
+                                                    .then((schedule) => {
+                                                        field.addSchedule(schedule);
+                                                    })
+                                            })
+                                    })
+                                let match = await order.getMatch();
+                                const conversation = new Conversation({
+                                    match_id: match[0].match_id,
+                                    members: [order.creator_id, order.finder_id],
+                                });
+                                conversation
+                                    .save(conversation)
+                                    .then(() => {
+                                        console.log("Conversation Created");
+                                    })
+                                    .catch(err => {
+                                        console.log(err.message);
+                                    })
+                                Order.update({ order_status: "Invalid" }, {
+                                    where: {
+                                        date_of_match: {
+                                            [Op.eq]: order.date_of_match
+                                        },
+                                        time_of_match: {
+                                            [Op.eq]: order.time_of_match
+                                        },
+                                        order_id: {
+                                            [Op.ne]: order.order_id
+                                        }
+                                    }
+                                })
+                            }
+                        }
                     })
-                }else if(order.order_type == "Match"){
-                    if(order.finder_id == null) {
-                        order.update({order_status: "Waiting"})
-                        MatchMaking.create({
-                            payement_distribution: 50,
-                            date_of_match: order.date_of_match,
-                            time_of_match: order.time_of_match,
-                            creator_id: order.creator_id,
-                            field_id: order.field_id
-                        })
-                        .then((match) => {
-                            match.addOrder(order)
-                        })
-                    } else{
-                        order.update({order_status: "Finish"})
-                        .then(()  => {
-                            Field.findByPk(order.field_id)
-                            .then((field) => {
-                                Schedule.create({
-                                    schedule_date: order.date_of_match,
-                                    schedule_time: order.time_of_match,
-                                    generate: "app"
-                                })
-                                .then((schedule) => {
-                                    field.addSchedule(schedule);
-                                })
-                            })
-                        })
-                    }
-                }
+                Transaction.create({
+                    transaction_time: req.body.settlement_time,
+                    bill_id: bill.bill_id
+                })
+                    .then(() => {
+                        res.send({ message: "success" })
+                    })
             })
-            Transaction.create({
-                transaction_time: req.body.settlement_time,
-                bill_id: bill.bill_id
-            })
-            .then(() => {
-                res.send({ message: "success" })
-            })
-        })
     }
 
     const cancelHandling = async function () {
@@ -249,4 +290,57 @@ exports.handlingNotification = async (req, res) => {
             break;
     }
 
+}
+
+exports.refundProcess = (req, res) => {
+    const refund = {
+        transaction_id: req.params.trans_id,
+        refund_reason: req.body.refund_reason
+    }
+    const user_id = req.params.id;
+    const transaction_id = req.params.trans_id;
+
+    Transaction.findOne({
+        where: {
+            transaction_id: transaction_id,
+            '$bill.user_id$': user_id,
+            '$bill.status$': "settlement"
+        },
+        include: [
+            {
+                model: db.bills,
+                as: "bill",
+                include: [
+                    {
+                        model: db.orders,
+                        as: "order"
+                    }
+                ]
+            }
+        ]
+    })
+    .then( (trans) => {
+        if(trans != null){
+            Order.update({ order_status: "Refund" }, {
+                where: {
+                    order_id: {
+                        [Op.eq]: trans.bill.order.order_id
+                    }
+                }
+            })
+            Refund.create(refund)
+            .then( () => {
+                res.send({ message: "Refund Success"})
+            })
+            .catch( err => {
+                res.status(500).send({
+                    message: err.message
+                })
+            });
+        }else{
+            res.status(404).send({
+                message: "Cannot refund, Invalid Transaction"
+            })
+        }
+    } )
 }

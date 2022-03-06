@@ -37,6 +37,7 @@ db.operationals = require("./operational.model")(sequelize, Sequelize);
 db.ratings = require("./rating.model")(sequelize, Sequelize);
 db.bills = require("./bill.model")(sequelize, Sequelize);
 db.transactions = require("./transaction.model")(sequelize, Sequelize);
+db.refunds = require("./refund.model")(sequelize, Sequelize);
 db.conversations = require("./conversation.model")(mongoose);
 db.messages = require("./message.model")(mongoose);
 
@@ -334,6 +335,21 @@ db.refreshToken.belongsTo(db.users, {
 db.users.hasOne(db.refreshToken, {
   foreignKey: 'user_id', targetKey: 'user_id'
 });
+//----------------------------------------------
+
+//Refund RELATION
+db.transactions.hasMany(db.refunds, {
+  foreignKey: {
+    name: "transaction_id",
+    allowNull: false
+  }
+});
+db.refunds.belongsTo(db.transactions, {
+  foreignKey: {
+    name: "transaction_id",
+    allowNull: false
+  }
+})
 //----------------------------------------------
 
 db.ROLES = ["user", "admin", "host"];

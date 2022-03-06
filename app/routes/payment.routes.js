@@ -13,5 +13,7 @@ module.exports = app => {
 
     router.post('/payment-handling/', [verifyPayment.checkSignatureKey], midtransController.handlingNotification)
 
+    router.post('/refund/:id/:trans_id' , midtransController.refundProcess)
+
     app.use('/api/payment', router);
 }
