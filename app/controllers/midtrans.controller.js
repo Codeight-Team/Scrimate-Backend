@@ -304,7 +304,7 @@ exports.refundProcess = (req, res) => {
         where: {
             transaction_id: transaction_id,
             '$bill.user_id$': user_id,
-            '$bill.status$': "settlement"
+            '$bill.bill_status$': "settlement"
         },
         include: [
             {
