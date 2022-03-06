@@ -10,7 +10,7 @@ checkIfEmailIsDuplicate = (req, res, next) => {
             email: req.body.email
         }
     }).then(user => {
-        if(user){
+        if (user) {
             res.status(400).send({
                 message: "Email already in used"
             });
@@ -22,12 +22,14 @@ checkIfEmailIsDuplicate = (req, res, next) => {
 };
 
 checkRolesExisted = (req, res, next) => {
-    if(req.body.role){
-        if(ROLES.indexOf(req.body.role) == -1){
-            res.status(400).send({
-                message: "Role (" + req.body.role + ") does not exist"
-            });
-            return;
+    if (req.body.role) {
+        for (let i = 0; i < req.body.role.length; i++) {
+            if (!ROLES.includes(req.body.role[i])) {
+                res.status(400).send({
+                    message: "Role (" + req.body.role + ") does not exist"
+                });
+                return;
+            }
         }
     }
     next();
