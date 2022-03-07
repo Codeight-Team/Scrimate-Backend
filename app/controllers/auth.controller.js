@@ -166,3 +166,7 @@ exports.refreshToken = async (req, res) => {
     }
 
 }
+
+exports.sendOTPVerif = async () => {
+    
+}

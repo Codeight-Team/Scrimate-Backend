@@ -199,6 +199,10 @@ exports.myMatch = (req, res) => {
             {
                 model: db.users,
                 as: "finder"
+            },
+            {
+                model: db.orders,
+                as: "order"
             }
         ]
     })
@@ -269,7 +273,7 @@ exports.getMatchDetail = (req,res) => {
     .then( async (match) => {
         let tempDate = new Date(match.dataValues.date_of_match);
         let order;
-        if(tempDate.getTime() < new Date()){
+        if(tempDate.getTime() < new Date() || match.order.order_status != "Refund" && match.order.order_status != "Failed" && match.order.order_status != "Finish"){
             order = await match.getOrder();
             order = order[0];
             order.update({order_status: "Invalid"});

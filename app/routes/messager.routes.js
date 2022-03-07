@@ -8,8 +8,8 @@ module.exports = app =>{
 
     //Message
     router.post('/add-message', messagerController.addMessage);
-    router.get('/get-massage/:id', messagerController.getMessage)
+    router.get('/get-message/:id', messagerController.getMessage)
 
-    app.use('/api/messager', router);
+    app.use('/api/messanger', router);
 
 }
