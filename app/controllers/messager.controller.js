@@ -29,7 +29,7 @@ exports.getConversation = (req, res) => {
         members: {$in: [id]}
     })
     .then(conv => {
-        if(conv == 1){
+        if(conv.length != 0){
             res.send(conv)
         }else{
             res.status(404).send({ message: "Conversation not found" })
@@ -65,7 +65,7 @@ exports.getMessage = (req, res) => {
         conversation_id: id
     })
     .then(data => {
-        if(data == 1){
+        if(data.length != 0){
             res.send(data)
         }else{
             res.status(404).send({ message: "Message conversation not found with id = " + id })
