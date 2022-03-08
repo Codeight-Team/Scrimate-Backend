@@ -48,9 +48,7 @@ exports.addMessage = (req, res) => {
     newMessage
     .save(newMessage)
     .then( msg => {
-        res.send({
-            message: "Success to send message: " + msg.text
-        })
+        res.send(newMessage)
     })
     .catch(err => {
         res.status(500).send({ message: err.message });
