@@ -1,9 +1,20 @@
 const db = require("../models");
 const config = require("../config/auth.config");
-const { users: User, roles: Role, refreshToken: RefreshToken } = db;
+const { users: User, roles: Role, refreshToken: RefreshToken, usersOTP: UserOTP } = db;
 const Op = db.Sequelize.Op;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+        user: "firhanreynaldi@gmail.com",
+        pass: "Telkomsel123"
+    }
+});
 
 // Regist User
 exports.createUser = (address_id, req, res) => {
@@ -167,6 +178,114 @@ exports.refreshToken = async (req, res) => {
 
 }
 
-exports.sendOTPVerif = async () => {
+exports.sendOTPVerif = async (user_id, email, res) => {
     
+
+    const OTP = `${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const emailInfo = {
+        from: "firhanreynaldi@gmail.com",
+        to: email,
+        subject: "Account Verification",
+        html: `<p>Verification Code: <b>${OTP}</b>. Enter the code in the app to verify your account</p> <p> This Code <b>expires in 1 hour</b>, Please verify immediately! </p>`
+    }
+
+    const hashedOTP = bcrypt.hash(OTP, 10);
+    const userotp = {
+        user_id: user_id,
+        otp: hashedOTP,
+        expiryDate: new Date.now() + 3600000
+    }
+    await UserOTP.create(userotp)
+    .then(async (result) => {
+        await transporter.sendMail(emailInfo);
+        res.send({
+            status: "Sent",
+            message: "Verification has been sent to " + email + ".",
+            expire: result.expiryDate
+        })
+    })
+    .catch(err => {
+        res.status(500).send({
+            message: err.message
+        })
+    });
+}
+
+exports.verifyAccount = (req,res) => {
+    const user_id = req.params.id;
+    const OTP = req.body.otp;
+
+    if(!user_id || !OTP){
+        res.status(500).send({ message: "Detail cannot empty" })
+    }else{
+        UserOTP.findOne({
+            where: {
+                user_id: user_id
+            }
+        })
+        .then((result) => {
+            if(result.length <= 0){
+                res.status(404).send({
+                    message: "Cannot find account with that id."
+                })
+            }else{
+                const {expiryDate} = result[0];
+                const {otp} = result[0];
+
+                if(expiryDate.getTime() < new Date.now()){
+                    UserOTP.destroy({
+                        where: {
+                            user_id: user_id
+                        }
+                    })
+                    .then(() => {
+                        res.send({ message: "Code has been expire, Please request a new code" })
+                    })
+                    .catch(err => {
+                        res.status(500).send({ message: err.message })
+                    })
+                }else{
+                    const ifValid = bcrypt.compare(OTP, otp)
+
+                    if(!ifValid){
+                        res.send(401).send({ message: "Invalid code"});
+                    }else{
+                        User.update({isVerif: true}, {
+                            where: {
+                                user_id: user_id
+                            }
+                        })
+                        .then(() => {
+                            res.send({ message: "Account has been verified successfully" })
+                        })
+                        .catch(err => {
+                            res.status(500).send({ message: err.message })
+                        });
+                    }
+                }
+
+            }
+        })
+        .catch(err => {
+            res.status(500).send({ message: err.message })
+        });
+    }
+}
+
+exports.resendOTP = (req,res) => {
+    const user_id = req.params.id;
+    const email = req.params.email;
+
+    if(!user_id || !email){
+        res.send(500).send({ message: "Details cannot be empty" })
+    }else{
+        UserOTP.destroy({
+            where: {
+                user_id: user_id
+            }
+        })
+        //Send otp in route
+    }
+
 }

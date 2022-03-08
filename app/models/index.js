@@ -38,6 +38,7 @@ db.ratings = require("./rating.model")(sequelize, Sequelize);
 db.bills = require("./bill.model")(sequelize, Sequelize);
 db.transactions = require("./transaction.model")(sequelize, Sequelize);
 db.refunds = require("./refund.model")(sequelize, Sequelize);
+db.usersOTP = require("./userOTP.model")(sequelize, Sequelize);
 db.conversations = require("./conversation.model")(mongoose);
 db.messages = require("./message.model")(mongoose);
 
@@ -347,6 +348,21 @@ db.transactions.hasMany(db.refunds, {
 db.refunds.belongsTo(db.transactions, {
   foreignKey: {
     name: "transaction_id",
+    allowNull: false
+  }
+})
+//----------------------------------------------
+
+//USEROTP RELATIONS
+db.users.hasOne(db.usersOTP, {
+  foreignKey: {
+    name: "user_id",
+    allowNull: false
+  }
+})
+db.usersOTP.belongsTo(db.users, {
+  foreignKey: {
+    name: "user_id",
     allowNull: false
   }
 })
