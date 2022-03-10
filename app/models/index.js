@@ -39,6 +39,7 @@ db.bills = require("./bill.model")(sequelize, Sequelize);
 db.transactions = require("./transaction.model")(sequelize, Sequelize);
 db.refunds = require("./refund.model")(sequelize, Sequelize);
 db.usersOTP = require("./userOTP.model")(sequelize, Sequelize);
+db.reports = require("./report.model")(sequelize, Sequelize);
 db.conversations = require("./conversation.model")(mongoose);
 db.messages = require("./message.model")(mongoose);
 
@@ -364,6 +365,25 @@ db.usersOTP.belongsTo(db.users, {
   foreignKey: {
     name: "user_id",
     allowNull: false
+  }
+})
+//----------------------------------------------
+
+//REPORT RELATION
+db.users.belongsToMany(db.users, {
+  as: "reporting",
+  foreignKey: "repoting_id",
+  through: db.reports
+})
+db.users.belongsToMany(db.users, {
+  as: "reported",
+  foreignKey: "reported_id",
+  through: db.reports
+})
+db.matchMaking.hasMany(db.reports, {
+  foreignKey: {
+    name: "match_id",
+    allowNull:false
   }
 })
 //----------------------------------------------

@@ -32,17 +32,15 @@ module.exports = app => {
     router.post('/login', authController.findOne)
     router.post('/refreshToken', authController.refreshToken)
 
-    router.post('/sendOTP/:id/:email', async(req,res, next) => {
-        await authController.sendOTPVerif(req.params.id, req.params.email, res);
+    router.post('/sendOTP/:id', async(req,res, next) => {
+        await authController.sendOTPVerif(req.params.id, req.body.email, res);
     });
 
-    router.post('/verifyOTP/:id',  async(req,res,next) => {
-        await authController.verifyAccount(req,res);
-    })
+    router.post('/verifyOTP/:id', authController.verifyAccount);
 
-    router.post('/resendOTP', async(req,res,next) => {
+    router.post('/resendOTP/:id', async(req,res,next) => {
         await authController.resendOTP(req,res);
-        await authController.sendOTPVerif(req.params.id, req.params.email, res)
+        await authController.sendOTPVerif(req.params.id, req.body.email, res)
     })
 
     app.use('/api/auth', router);

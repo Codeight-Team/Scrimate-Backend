@@ -149,3 +149,42 @@ exports.upload = multer({
         cb('Give proper file formate')
     }
 }).single('image')
+
+exports.addFieldSchedule = (req,res) => {
+
+    const field_id = req.params.field_id;
+
+    const schedule = {
+        schedule_date: req.body.schedule_date,
+        schedule_time: req.body.schedule_time,
+        generate: "self"
+    }
+
+    Field.findOne({
+        where: {
+            field_id: field_id
+        }
+    })
+    .then((result) => {
+        if(!result){
+            res.status(404).send({
+                message: "Field doesnt exist"
+            })
+        }else{
+            Schedule.create(schedule)
+            .then(async (schedules) => {
+                await schedules.addField(result);
+                res.send({
+                    message: "Schedule added"
+                })
+            })
+            .catch(err => {
+                res.status(500).send(err.message)
+            })
+        }
+    })
+    .catch(err => {
+        res.status(500).send(err.message)
+    })
+
+}
