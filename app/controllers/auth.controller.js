@@ -190,11 +190,11 @@ exports.sendOTPVerif = async (user_id, email, res) => {
         html: `<p>Verification Code: <b>${OTP}</b>. Enter the code in the app to verify your account</p> <p> This Code <b>expires in 1 hour</b>, Please verify immediately! </p>`
     }
 
-    const hashedOTP = bcrypt.hash(OTP, 10);
+    const hashedOTP = await bcrypt.hash(OTP, 10);
     const userotp = {
         user_id: user_id,
         otp: hashedOTP,
-        expiryDate: new Date.now() + 3600000
+        expiryDate:  Date.now() + 3600000
     }
     await UserOTP.create(userotp)
     .then(async (result) => {
@@ -225,15 +225,15 @@ exports.verifyAccount = (req,res) => {
             }
         })
         .then((result) => {
-            if(result.length <= 0){
+            if(!result){
                 res.status(404).send({
                     message: "Cannot find account with that id."
                 })
             }else{
-                const {expiryDate} = result[0];
-                const {otp} = result[0];
+                const expiryDate = result.expiryDate;
+                const otp = result.otp;
 
-                if(expiryDate.getTime() < new Date.now()){
+                if(expiryDate.getTime() < new Date()){
                     UserOTP.destroy({
                         where: {
                             user_id: user_id
@@ -246,7 +246,7 @@ exports.verifyAccount = (req,res) => {
                         res.status(500).send({ message: err.message })
                     })
                 }else{
-                    const ifValid = bcrypt.compare(OTP, otp)
+                    const ifValid = bcrypt.compare(OTP.toString(), otp)
 
                     if(!ifValid){
                         res.send(401).send({ message: "Invalid code"});
@@ -257,6 +257,11 @@ exports.verifyAccount = (req,res) => {
                             }
                         })
                         .then(() => {
+                            UserOTP.destroy({
+                                where: {
+                                    user_id: user_id
+                                }
+                            })
                             res.send({ message: "Account has been verified successfully" })
                         })
                         .catch(err => {
@@ -275,7 +280,7 @@ exports.verifyAccount = (req,res) => {
 
 exports.resendOTP = (req,res) => {
     const user_id = req.params.id;
-    const email = req.params.email;
+    const email = req.body.email;
 
     if(!user_id || !email){
         res.send(500).send({ message: "Details cannot be empty" })
@@ -288,4 +293,37 @@ exports.resendOTP = (req,res) => {
         //Send otp in route
     }
 
+}
+
+exports.sendRandomPasswordtoEmail = (req,res) =>  {
+    const email = req.body.email;
+
+    const password = (Math.random() + 1).toString(36).substring(2);
+    const emailInfo = {
+        from: "firhanreynaldi@gmail.com",
+        to: email,
+        subject: "Account Verification",
+        html: `<p>Your Password: <b>${password}</b>.</p> <p> Please <b>Memorize</b> your password. </p>`
+    }
+
+    User.findOne({
+        where: {
+            email: email
+        }
+    })
+    .then(async (result) => {
+        if(!result){
+            res.status(404).send({
+                message: "Account doesnt exist"
+            })
+        }else{
+            var hashedPass = bcrypt.hashSync(password, 10);
+            await result.update({ password: hashedPass })
+            await transporter.sendMail(emailInfo)
+            res.send({
+                status: "Sent",
+                message: "New password has been sent to " + email + ".",
+            })
+        }
+    })
 }

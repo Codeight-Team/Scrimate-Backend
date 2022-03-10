@@ -1,6 +1,7 @@
 module.exports = app => {
     const users = require("../controllers/user.controller.js");
     const ratings = require("../controllers/rating.controller");
+    const auths = require("../controllers/auth.controller");
   
     var router = require("express").Router();
 
@@ -11,6 +12,21 @@ module.exports = app => {
         res.send(err.message);
       }
     });
+
+    router.post("/forgot-password", async (req,res,next) => {
+      try {
+        const isExist = await users.checkUserExistByEmail(req,res);
+
+        if(isExist == 1)
+          await auths.sendRandomPasswordtoEmail(req,res)
+      } catch (err) {
+        res.status(500).send(err.message)
+      }
+    })
+
+    router.post("/report/:reporting_id/:reported_id/:match_id", users.reportUser)
+
+    router.post("/change-password/:id", users.changePassword)
   
     // Retrieve all Tutorials
     router.get("/", users.findAll);

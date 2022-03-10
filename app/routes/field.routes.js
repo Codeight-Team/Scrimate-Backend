@@ -12,6 +12,9 @@ module.exports = app => {
             return next(err);
         }
     } )
+
+    router.post('/add-schedule/:field_id', fieldController.addFieldSchedule)
+
     router.get('/get-fields/:id', fieldController.getFields);
     router.post('/field-schedule/:id', fieldController.getFieldSchedule);
 
