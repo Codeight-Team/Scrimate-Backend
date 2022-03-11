@@ -195,7 +195,10 @@ exports.handlingNotification = async (req, res) => {
                                     },
                                     order_id: {
                                         [Op.ne]: order.order_id
-                                    }
+                                    },
+                                    field_id: {
+                                        [Op.eq]: order.field_id
+                                    },
                                 }
                             })
                         } else if (order.order_type == "Match") {
@@ -249,7 +252,10 @@ exports.handlingNotification = async (req, res) => {
                                         },
                                         order_id: {
                                             [Op.ne]: order.order_id
-                                        }
+                                        },
+                                        field_id: {
+                                            [Op.eq]: order.field_id
+                                        },
                                     }
                                 })
                             }
